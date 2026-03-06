@@ -5,16 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر الوزير بلس 🔥</title>
     <style>
-        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 0; }
-        /* تصميم القائمة (الثلاث شرطات) */
-        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 30px; cursor: pointer; color: red; z-index: 1000; }
-        .sidebar { position: fixed; right: -250px; top: 0; width: 250px; height: 100%; background: #111; transition: 0.3s; padding: 20px; border-left: 2px solid red; z-index: 999; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
+        /* القائمة الجانبية */
+        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 30px; cursor: pointer; color: red; z-index: 1001; }
+        .sidebar { position: fixed; right: -280px; top: 0; width: 260px; height: 100%; background: #111; transition: 0.3s; padding: 20px; border-left: 2px solid red; z-index: 1000; }
         .sidebar.active { right: 0; }
         
-        header { padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #900, #000); }
-        .app-item { background: #111; margin: 10px; padding: 15px; border-radius: 15px; display: flex; align-items: center; border: 1px solid #222; }
-        .app-img { width: 60px; height: 60px; border-radius: 12px; margin-left: 15px; }
-        .install-btn { background: red; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; margin-right: auto; }
+        header { padding: 60px 20px; text-align: center; background: linear-gradient(to bottom, #700, #000); }
+        .app-item { background: #111; margin: 15px; padding: 15px; border-radius: 18px; display: flex; align-items: center; border: 1px solid #222; }
+        .app-img { width: 65px; height: 65px; border-radius: 15px; margin-left: 15px; border: 1px solid #333; }
+        .info { flex-grow: 1; }
+        .install-btn { background: red; color: white; border: none; padding: 10px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -22,18 +23,17 @@
     <div class="menu-btn" onclick="toggleMenu()">☰</div>
     
     <div class="sidebar" id="sidebar">
-        <h2 style="color:red;">الوزير بلس 👑</h2>
+        <h2 style="color:red; margin-top:40px;">الوزير بلس 👑</h2>
         <hr border="1" color="red">
-        <p>جميع الحقوق محفوظة لفريق الوزير 2026</p>
-        <p style="color:#aaa; font-size:13px;">حمل تطبيقاتك الآن من موقع الوزير قبل أن تصبح مدفوعة في الأيام القادمة.. انشر الموقع لأخوياك! 🔥</p>
+        <p style="font-size:14px; line-height:1.6;">حمل تطبيقاتك الآن من موقع الوزير قبل أن تصبح مدفوعة في الأيام القادمة.. انشر الموقع لأخوياك! 🔥</p>
+        <div style="position:absolute; bottom:20px; font-size:12px; color:gray;">جميع الحقوق محفوظة لفريق الوزير 2026 ©</div>
     </div>
 
     <header>
-        <h1>وزير بلس 🔥</h1>
-        <p>تطبيقاتك المحدثة في مكان واحد</p>
+        <h1 style="margin:0; font-size:35px; text-shadow: 0 0 15px red;">الوزير بلس 🔥</h1>
     </header>
 
-    <div id="apps-container"></div>
+    <div id="apps-list" style="padding-bottom: 50px;">جاري جلب تطبيقات الوزير...</div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -44,30 +44,29 @@
             authDomain: "minister-plus.firebaseapp.com",
             projectId: "minister-plus",
             storageBucket: "minister-plus.firebasestorage.app",
+            messagingSenderId: "438719729037",
             appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // وظيفة القائمة
         window.toggleMenu = () => document.getElementById('sidebar').classList.toggle('active');
 
-        // جلب التطبيقات محدثة تلقائياً
         const q = query(collection(db, "apps"), orderBy("time", "desc"));
         onSnapshot(q, (snapshot) => {
-            const container = document.getElementById('apps-container');
-            container.innerHTML = '';
+            const list = document.getElementById('apps-list');
+            list.innerHTML = '';
             snapshot.forEach((doc) => {
-                const app = doc.data();
-                container.innerHTML += `
+                const appData = doc.data();
+                list.innerHTML += `
                     <div class="app-item">
-                        <img src="${app.icon}" class="app-img">
-                        <div>
-                            <strong>${app.name}</strong><br>
-                            <small style="color:gray;">${app.desc}</small>
+                        <img src="${appData.icon}" class="app-img">
+                        <div class="info">
+                            <strong>${appData.name}</strong><br>
+                            <small style="color:#888;">${appData.desc}</small>
                         </div>
-                        <button class="install-btn" onclick="installApp('${app.ipa}')">تثبيت</button>
+                        <button class="install-btn" onclick="installApp('${appData.ipa}')">تثبيت</button>
                     </div>
                 `;
             });
@@ -75,7 +74,7 @@
 
         window.installApp = (ipaUrl) => {
             if(confirm("هل تريد تثبيت هذا التطبيق؟")) {
-                const plist = `https://sder86164-cell.github.io/store/pubg.plist?url=${ipaUrl}`;
+                const plist = `https://sder86164-cell.github.io/store/pubg.plist`;
                 location.href = `itms-services://?action=download-manifest&url=${plist}`;
             }
         };
