@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>إدارة الوزير 🛠️</title>
+    <style>
+        body { background: #000; color: #ff4500; font-family: monospace; text-align: center; padding: 20px; }
+        .box { border: 1px solid #ff4500; padding: 20px; max-width: 400px; margin: auto; }
+        input, textarea { width: 100%; margin: 10px 0; background: #111; color: white; border: 1px solid #333; padding: 10px; }
+        button { width: 100%; padding: 15px; background: #ff4500; font-weight: bold; cursor: pointer; border: none; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>إضافة تطبيق جديد ➕</h2>
+        <input id="n" placeholder="اسم التطبيق">
+        <textarea id="d" placeholder="الوصف"></textarea>
+        <input id="i" placeholder="رابط الأيقونة">
+        <input type="file" id="f" accept=".ipa">
+        <button onclick="up()">نشر فوراً 🔥</button>
+    </div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-storage.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js";
+        const firebaseConfig = { /* ضع إعداداتك هنا */ };
+        const app = initializeApp(firebaseConfig);
+        const storage = getStorage(app);
+        const db = getFirestore(app);
+        window.up = async () => {
+            const file = document.getElementById('f').files[0];
+            const name = document.getElementById('n').value;
+            const storageRef = ref(storage, 'apps/' + file.name);
+            const task = uploadBytesResumable(storageRef, file);
+            task.on('state_changed', null, null, async () => {
+                const url = await getDownloadURL(task.snapshot.ref);
+                await addDoc(collection(db, "apps"), { name, desc: document.getElementById('d').value, icon: document.getElementById('i').value, ipaUrl: url, plistUrl: "رابط_البلست" });
+                alert("تم النشر بنجاح يا وزير!");
+            });
+        };
+    </script>
+</body>
+</html>
