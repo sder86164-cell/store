@@ -2,22 +2,23 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم الوزير 2026 👑</title>
+    <title>مصنع تطبيقات الوزير 🛠️</title>
     <style>
-        body { background: #050505; color: white; font-family: 'Cairo', sans-serif; text-align: center; padding: 20px; }
-        .admin-box { background: #111; border: 2px solid red; padding: 25px; border-radius: 20px; max-width: 500px; margin: auto; box-shadow: 0 0 30px rgba(255,0,0,0.3); }
+        body { background: #050505; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
+        .admin-box { background: #111; border: 2px solid red; padding: 25px; border-radius: 20px; max-width: 500px; margin: auto; box-shadow: 0 0 30px rgba(255,0,0,0.5); }
         input, textarea { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: white; }
-        .btn-publish { background: linear-gradient(90deg, #ff0000, #990000); color: white; padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 18px; width: 100%; }
+        .btn-publish { background: linear-gradient(90deg, #ff0000, #990000); color: white; padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 18px; width: 100%; transition: 0.3s; }
+        .btn-publish:hover { transform: scale(1.05); box-shadow: 0 0 20px red; }
     </style>
 </head>
 <body>
-    <h1>مصنع تطبيقات الوزير 🛠️</h1>
+    <h1 style="color:red; text-shadow: 0 0 10px red;">وزير بلس - إدارة النشر 👑</h1>
     <div class="admin-box">
         <input type="text" id="name" placeholder="اسم التطبيق (مثال: ببجي الوزير)">
-        <input type="text" id="ipa" placeholder="رابط ملف الـ IPA المدموج">
-        <input type="text" id="icon" placeholder="رابط أيقونة التطبيق">
-        <input type="text" id="cert" placeholder="رابط ملف الشهادة (للتوثيق)">
-        <textarea id="desc" placeholder="وصف التطبيق (مثال: مدموج بهاك VIP)"></textarea>
+        <input type="text" id="ipa" placeholder="رابط الـ IPA المباشر من GitHub">
+        <input type="text" id="icon" placeholder="رابط أيقونة التطبيق (صورة)">
+        <input type="text" id="cert" placeholder="رابط الشهادة المستخدمة">
+        <textarea id="desc" rows="3" placeholder="وصف التطبيق (مثال: كود مود، ثبات ايم)"></textarea>
         <button class="btn-publish" onclick="pushToUsers()">دمج ونشر تلقائي 🔥</button>
     </div>
 
@@ -30,6 +31,7 @@
             authDomain: "minister-plus.firebaseapp.com",
             projectId: "minister-plus",
             storageBucket: "minister-plus.firebasestorage.app",
+            messagingSenderId: "438719729037",
             appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
         };
 
@@ -47,8 +49,11 @@
             };
 
             if(data.name && data.ipa) {
-                await addDoc(collection(db, "apps"), data);
-                alert("تم الدمج والرفع! سيظهر الآن عند جميع الزبائن 🚀");
+                try {
+                    await addDoc(collection(db, "apps"), data);
+                    alert("تم الدمج والرفع بنجاح! سيظهر الآن عند جميع الزبائن 🚀");
+                    location.reload();
+                } catch (e) { alert("تأكد من تفعيل Rules في Firebase"); }
             } else { alert("عبي البيانات كاملة يا وزير!"); }
         }
     </script>
