@@ -5,15 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>متجر الوزير بلس 🔥</title>
     <style>
-        body { background: #111; color: white; font-family: sans-serif; margin: 0; padding: 20px; }
-        .app-card { background: #222; padding: 15px; border-radius: 15px; margin-bottom: 15px; display: flex; align-items: center; border: 1px solid #333; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 0; }
+        /* تصميم القائمة (الثلاث شرطات) */
+        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 30px; cursor: pointer; color: red; z-index: 1000; }
+        .sidebar { position: fixed; right: -250px; top: 0; width: 250px; height: 100%; background: #111; transition: 0.3s; padding: 20px; border-left: 2px solid red; z-index: 999; }
+        .sidebar.active { right: 0; }
+        
+        header { padding: 40px 20px; text-align: center; background: linear-gradient(to bottom, #900, #000); }
+        .app-item { background: #111; margin: 10px; padding: 15px; border-radius: 15px; display: flex; align-items: center; border: 1px solid #222; }
         .app-img { width: 60px; height: 60px; border-radius: 12px; margin-left: 15px; }
-        .install-btn { background: #ff0000; color: white; border: none; padding: 8px 20px; border-radius: 20px; font-weight: bold; margin-right: auto; }
+        .install-btn { background: red; color: white; border: none; padding: 10px 20px; border-radius: 10px; font-weight: bold; margin-right: auto; }
     </style>
 </head>
 <body>
-    <h1 style="text-align:center;">وزير بلس 👑</h1>
-    <div id="app-list">جاري تحميل التطبيقات...</div>
+
+    <div class="menu-btn" onclick="toggleMenu()">☰</div>
+    
+    <div class="sidebar" id="sidebar">
+        <h2 style="color:red;">الوزير بلس 👑</h2>
+        <hr border="1" color="red">
+        <p>جميع الحقوق محفوظة لفريق الوزير 2026</p>
+        <p style="color:#aaa; font-size:13px;">حمل تطبيقاتك الآن من موقع الوزير قبل أن تصبح مدفوعة في الأيام القادمة.. انشر الموقع لأخوياك! 🔥</p>
+    </div>
+
+    <header>
+        <h1>وزير بلس 🔥</h1>
+        <p>تطبيقاتك المحدثة في مكان واحد</p>
+    </header>
+
+    <div id="apps-container"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -24,36 +44,40 @@
             authDomain: "minister-plus.firebaseapp.com",
             projectId: "minister-plus",
             storageBucket: "minister-plus.firebasestorage.app",
-            messagingSenderId: "438719729037",
             appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // وظيفة القائمة
+        window.toggleMenu = () => document.getElementById('sidebar').classList.toggle('active');
+
+        // جلب التطبيقات محدثة تلقائياً
         const q = query(collection(db, "apps"), orderBy("time", "desc"));
         onSnapshot(q, (snapshot) => {
-            const container = document.getElementById('app-list');
+            const container = document.getElementById('apps-container');
             container.innerHTML = '';
             snapshot.forEach((doc) => {
-                const data = doc.data();
+                const app = doc.data();
                 container.innerHTML += `
-                    <div class="app-card">
-                        <img src="${data.icon}" class="app-img">
+                    <div class="app-item">
+                        <img src="${app.icon}" class="app-img">
                         <div>
-                            <strong>${data.name}</strong>
-                            <div style="font-size:12px; color:#aaa;">${data.desc}</div>
+                            <strong>${app.name}</strong><br>
+                            <small style="color:gray;">${app.desc}</small>
                         </div>
-                        <button class="install-btn" onclick="install('${data.ipa}')">تثبيت</button>
+                        <button class="install-btn" onclick="installApp('${app.ipa}')">تثبيت</button>
                     </div>
                 `;
             });
         });
 
-        window.install = (ipaUrl) => {
-            // هنا نستخدم رابط itms-services لتحميل الـ IPA
-            const plistUrl = `https://sder86164-cell.github.io/store/pubg.plist`; // سنحتاج لتعديل هذا ليكون ديناميكي لاحقاً
-            location.href = `itms-services://?action=download-manifest&url=${plistUrl}`;
+        window.installApp = (ipaUrl) => {
+            if(confirm("هل تريد تثبيت هذا التطبيق؟")) {
+                const plist = `https://sder86164-cell.github.io/store/pubg.plist?url=${ipaUrl}`;
+                location.href = `itms-services://?action=download-manifest&url=${plist}`;
+            }
         };
     </script>
 </body>
