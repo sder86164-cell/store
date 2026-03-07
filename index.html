@@ -3,307 +3,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>متجر الوزير بلس | الفخامة الملكية 👑</title>
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <title>الوزير بلس | الفخامة المطلقة 👑</title>
     <style>
+        /* استيراد خط مشابه لـ SF Pro الخاص بآبل */
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
+
         :root {
-            --primary-glow: #00ff00;
-            --glass-bg: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --gold-royal: #d4af37;
+            --emerald: #00ff88;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --bg-black: #000000;
         }
 
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
 
         body {
+            background-color: var(--bg-black);
             margin: 0;
-            padding: 20px;
-            background: #000;
             color: #fff;
-            font-family: 'Tajawal', sans-serif;
             overflow-x: hidden;
-            min-height: 100vh;
+            scroll-behavior: smooth;
         }
 
-        /* تأثير النجوم المتحركة */
-        #star-canvas {
+        /* 1. الغبار الكوني (Cosmic Dust) */
+        #dust-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             z-index: -1;
-            background: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+            pointer-events: none;
         }
 
+        /* الإضاءة النيون الخافتة (Ambient Glow) */
+        .ambient-glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: moveGlow 15s infinite alternate;
+        }
+
+        @keyframes moveGlow {
+            from { top: 10%; left: 10%; }
+            to { top: 70%; left: 80%; }
+        }
+
+        /* 2. الهيدر واللوادر */
         header {
+            padding: 60px 20px 30px;
             text-align: center;
-            padding: 40px 0;
         }
 
-        header h1 {
-            font-size: 2.8em;
-            margin: 0;
-            color: #fff;
-            text-shadow: 0 0 15px var(--primary-glow);
-            letter-spacing: 2px;
+        .logo-pulse {
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: logoPulse 3s infinite ease-in-out;
         }
 
-        header p {
-            color: #888;
-            font-size: 1.1em;
-            margin-top: 10px;
+        @keyframes logoPulse {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px var(--emerald)); }
+            50% { opacity: 0.6; filter: drop-shadow(0 0 20px var(--emerald)); }
         }
 
-        /* قائمة التطبيقات العمودية */
-        .app-list {
-            max-width: 600px;
+        /* 3. قائمة التطبيقات (Vertical List) */
+        .app-container {
+            max-width: 450px;
             margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
+            padding: 0 15px 100px;
         }
 
-        /* تأثير الزجاج (Glassmorphism) */
         .app-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            padding: 15px;
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 0.5px solid var(--border);
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            gap: 16px;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s;
+            position: relative;
+            overflow: hidden;
         }
 
-        .app-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary-glow);
-            box-shadow: 0 10px 20px rgba(0, 255, 0, 0.1);
+        .app-card:active {
+            transform: scale(0.96);
+            border-color: var(--emerald);
         }
 
         .app-icon {
-            width: 70px;
-            height: 70px;
-            border-radius: 18px;
-            object-fit: cover;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            width: 64px;
+            height: 64px;
+            border-radius: 14px; /* iOS Squircle */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
         }
 
-        .app-details {
-            flex-grow: 1;
-        }
+        .app-meta { flex-grow: 1; }
+        .app-name { font-weight: 700; font-size: 1.1em; display: block; margin-bottom: 4px; }
+        .app-sub { font-size: 0.8em; color: #666; letter-spacing: 0.5px; }
 
-        .app-details h3 {
-            margin: 0;
-            font-size: 1.3em;
-            color: #fff;
-        }
-
-        .app-details span {
-            font-size: 0.85em;
-            color: var(--primary-glow);
-            background: rgba(0, 255, 0, 0.1);
-            padding: 2px 10px;
-            border-radius: 10px;
-            margin-top: 5px;
-            display: inline-block;
-        }
-
-        /* النافذة المنبثقة (Modal) */
-        .modal {
-            display: none;
+        /* 4. النافذة المنبثقة (The Elite Pop-up) */
+        .modal-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px);
+            display: none;
+            z-index: 9999;
             justify-content: center;
             align-items: center;
-            padding: 20px;
         }
 
         .modal-content {
-            background: #0a0a0a;
-            width: 100%;
-            max-width: 450px;
-            border-radius: 30px;
-            border: 1px solid var(--primary-glow);
-            padding: 30px;
+            width: 85%;
+            max-width: 380px;
+            background: linear-gradient(145deg, #111, #000);
+            border: 1px solid var(--border);
+            border-radius: 35px;
+            padding: 40px 25px;
             text-align: center;
-            position: relative;
-            animation: modalIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform: scale(0.5);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
         }
 
-        @keyframes modalIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
         }
 
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 24px;
-            color: #555;
-            cursor: pointer;
+        /* النبض الضوئي للشهادة */
+        .cert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #aaa;
+            margin-top: 15px;
         }
 
-        .install-btn {
-            background: linear-gradient(135deg, #00ff00 0%, #008000 100%);
-            color: white;
-            border: none;
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--emerald);
+            animation: dotPulse 1.5s infinite;
+        }
+
+        @keyframes dotPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* زر التحميل (Magic Button) */
+        .magic-btn {
+            background: linear-gradient(180deg, #333 0%, #111 100%);
+            border: 1px solid var(--border);
+            color: #fff;
             width: 100%;
             padding: 18px;
-            border-radius: 15px;
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-top: 25px;
+            border-radius: 18px;
+            font-weight: 700;
+            margin-top: 30px;
             cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
         }
 
-        .status-badge {
-            margin: 15px 0;
-            font-size: 0.9em;
-            color: #aaa;
+        .magic-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
         }
 
-        #loading { display: none; color: var(--primary-glow); margin-top: 10px; font-weight: bold; }
+        .magic-btn:hover::after { left: 100%; }
+
+        /* شريط التمرير المخفي */
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-<canvas id="star-canvas"></canvas>
+    <canvas id="dust-canvas"></canvas>
+    <div class="ambient-glow"></div>
 
-<header>
-    <h1>الوزير بلس 👑</h1>
-    <p>المتجر الأول للتطبيقات الموقعة</p>
-</header>
+    <header>
+        <div class="logo-pulse">ALWAZIR PLUS</div>
+        <p>Ultra-Premium Store</p>
+    </header>
 
-<div class="app-list" id="appList">
-    </div>
+    <div class="app-container" id="appList">
+        </div>
 
-<div class="modal" id="appModal">
-    <div class="modal-content">
-        <span class="close-btn" onclick="closeModal()">✕</span>
-        <img id="mIcon" src="" class="app-icon" style="width: 120px; height: 120px; border-radius: 25px;">
-        <h2 id="mName" style="margin: 15px 0 5px 0; font-size: 1.8em;"></h2>
-        <div id="mBundle" style="color: #666; margin-bottom: 15px;"></div>
-        
-        <div class="status-badge">حالة الشهادة: <span style="color: var(--primary-glow);">تعمل بنجاح ✅</span></div>
-        
-        <p style="color: #888; line-height: 1.6;">هذا التطبيق مدموج بشهادة خاصة ضد الحظر، يدعم جميع إصدارات iOS ويتم تحديثه بشكل دوري.</p>
-
-        <button class="install-btn" id="installAction">تثبيت التطبيق الملكي 🚀</button>
-        <div id="loading">جاري معالجة البيانات السحابية...</div>
-    </div>
-</div>
-
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
-
-    const firebaseConfig = {
-        apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
-        authDomain: "minister-plus.firebaseapp.com",
-        projectId: "minister-plus",
-        storageBucket: "minister-plus.firebasestorage.app",
-        appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // جلب التطبيقات وعرضها
-    onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snap) => {
-        const listContainer = document.getElementById('appList');
-        listContainer.innerHTML = '';
-        snap.forEach((doc) => {
-            const data = doc.data();
-            const card = `
-                <div class="app-card" onclick='openModal(${JSON.stringify(data)})'>
-                    <img src="${data.img}" class="app-icon">
-                    <div class="app-details">
-                        <h3>${data.name}</h3>
-                        <span>${data.isReady ? 'مدموج وجاهز ✅' : 'شهادة خاصة ✨'}</span>
-                    </div>
-                    <div style="color: #444; font-size: 1.5em;">←</div>
-                </div>
-            `;
-            listContainer.innerHTML += card;
-        });
-    });
-
-    // التحكم في المنبثق
-    window.openModal = (data) => {
-        document.getElementById('mName').innerText = data.name;
-        document.getElementById('mIcon').src = data.img;
-        document.getElementById('mBundle').innerText = data.bundle;
-        document.getElementById('appModal').style.display = 'flex';
-        
-        document.getElementById('installAction').onclick = () => {
-            startInstall(data);
-        };
-    };
-
-    window.closeModal = () => { document.getElementById('appModal').style.display = 'none'; };
-
-    // البرمجة الثابتة للتثبيت
-    function startInstall(data) {
-        const btn = document.getElementById('installAction');
-        const load = document.getElementById('loading');
-        btn.style.display = 'none';
-        load.style.display = 'block';
-
-        setTimeout(() => {
-            // بناء الـ Plist داخلياً لضمان عمل الرابط
-            const plist = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>${data.ipa}</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>${data.bundle}</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>${data.name}</string></dict></dict></array></dict></plist>`;
-            const base64 = btoa(unescape(encodeURIComponent(plist)));
-            window.location.href = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64}`;
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <img id="mIcon" src="" class="app-icon" style="width: 100px; height: 100px; margin-bottom: 20px;">
+            <h2 id="mName" style="margin: 0; font-size: 1.8em;"></h2>
             
-            load.innerText = "اضغط 'تثبيت' في النافذة الظاهرة";
-            setTimeout(() => { closeModal(); btn.style.display = 'block'; load.style.display = 'none'; }, 3000);
-        }, 1500);
-    }
+            <div class="cert-badge">
+                <div class="pulse-dot"></div>
+                الشهادة تعمل بنجاح ✅
+            </div>
 
-    // تأثير النجوم المتحركة (Background Particles)
-    const canvas = document.getElementById('star-canvas');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
-    function initStars() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        stars = [];
-        for(let i=0; i<80; i++) {
-            stars.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                size: Math.random() * 2,
-                speed: Math.random() * 0.5 + 0.2
+            <p style="color: #666; font-size: 0.9em; line-height: 1.6; margin-top: 20px;">
+                نسخة حصرية، مدموجة بأحدث أدوات التوقيع السحابية لضمان الاستقرار التام.
+            </p>
+
+            <button class="magic-btn" id="installBtn">تثبيت الآن ⚡</button>
+            <div onclick="closeModal()" style="margin-top: 20px; color: #444; cursor: pointer; font-size: 0.9em;">إغلاق النافذة</div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
+            authDomain: "minister-plus.firebaseapp.com",
+            projectId: "minister-plus",
+            storageBucket: "minister-plus.firebasestorage.app",
+            appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // جلب البيانات وعرضها
+        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snap) => {
+            const container = document.getElementById('appList');
+            container.innerHTML = '';
+            snap.forEach((doc) => {
+                const app = doc.data();
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.onclick = () => openModal(app);
+                card.innerHTML = `
+                    <img src="${app.img}" class="app-icon">
+                    <div class="app-meta">
+                        <span class="app-name">${app.name}</span>
+                        <span class="app-sub">${app.isReady ? 'STABLE VERSION' : 'SIGNED EDITION'}</span>
+                    </div>
+                    <div style="opacity: 0.3">→</div>
+                `;
+                container.appendChild(card);
             });
-        }
-    }
-    function animate() {
-        ctx.clearRect(0,0,canvas.width,canvas.height);
-        ctx.fillStyle = "#ffffff";
-        stars.forEach(s => {
-            ctx.beginPath();
-            ctx.arc(s.x, s.y, s.size, 0, Math.PI*2);
-            ctx.fill();
-            s.y += s.speed;
-            if(s.y > canvas.height) s.y = 0;
         });
-        requestAnimationFrame(animate);
-    }
-    initStars(); animate();
-    window.addEventListener('resize', initStars);
-</script>
 
+        // النافذة المنبثقة
+        window.openModal = (app) => {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('mIcon').src = app.img;
+            document.getElementById('mName').innerText = app.name;
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
+
+            document.getElementById('installBtn').onclick = () => {
+                const plist = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>${app.ipa}</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>${app.bundle}</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>${app.name}</string></dict></dict></array></dict></plist>`;
+                const base64 = btoa(unescape(encodeURIComponent(plist)));
+                window.location.href = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64}`;
+            };
+        };
+
+        window.closeModal = () => {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 400);
+        };
+
+        // 5. تأثير الغبار الكوني (Particle Engine)
+        const canvas = document.getElementById('dust-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<60; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    vx: Math.random() * 0.2 - 0.1,
+                    vy: Math.random() * 0.2 + 0.1
+                });
+            }
+        }
+        function render() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "rgba(255,255,255,0.1)";
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+                p.x += p.vx; p.y += p.vy;
+                if(p.y > canvas.height) p.y = 0;
+            });
+            requestAnimationFrame(render);
+        }
+        init(); render();
+        window.addEventListener('resize', init);
+    </script>
 </body>
 </html>
