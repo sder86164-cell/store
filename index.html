@@ -1,329 +1,824 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>الوزير بلس | الفخامة المطلقة 👑</title>
-    <style>
-        /* استيراد خط مشابه لـ SF Pro الخاص بآبل */
-        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
+  <meta charset="UTF-8" />
+  <title>Plus Store – iOS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        :root {
-            --gold-royal: #d4af37;
-            --emerald: #00ff88;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --bg-black: #000000;
-        }
+  <!-- Tajawal / SF Pro -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet" />
 
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            font-family: 'Tajawal', sans-serif;
-        }
+  <!-- Firebase (استخدم نفس النسخة التي لديك إن كانت مختلفة) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-        body {
-            background-color: var(--bg-black);
-            margin: 0;
-            color: #fff;
-            overflow-x: hidden;
-            scroll-behavior: smooth;
-        }
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        /* 1. الغبار الكوني (Cosmic Dust) */
-        #dust-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            pointer-events: none;
-        }
+    :root {
+      --bg-main: #02030a;
+      --card-bg: rgba(10, 12, 25, 0.78);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent: #00ff9d;
+      --accent-soft: rgba(0, 255, 157, 0.25);
+      --accent-red: #ff4b6a;
+      --text-main: #f5f7ff;
+      --text-muted: #8b90a5;
+      --glass-blur: 22px;
+      --radius-xl: 22px;
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.75);
+      --shadow-glow: 0 0 32px rgba(0, 255, 157, 0.35);
+    }
 
-        /* الإضاءة النيون الخافتة (Ambient Glow) */
-        .ambient-glow {
-            position: fixed;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
-            filter: blur(80px);
-            z-index: -1;
-            border-radius: 50%;
-            animation: moveGlow 15s infinite alternate;
-        }
+    body {
+      font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #10152b 0, #02030a 45%, #000000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
 
-        @keyframes moveGlow {
-            from { top: 10%; left: 10%; }
-            to { top: 70%; left: 80%; }
-        }
+    /* خلفية الجزيئات */
+    #particles-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-        /* 2. الهيدر واللوادر */
-        header {
-            padding: 60px 20px 30px;
-            text-align: center;
-        }
+    .page-shell {
+      position: relative;
+      z-index: 1;
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 24px 16px 40px;
+    }
 
-        .logo-pulse {
-            font-size: 2.5em;
-            font-weight: 700;
-            letter-spacing: -1px;
-            background: linear-gradient(to bottom, #fff, #888);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: logoPulse 3s infinite ease-in-out;
-        }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
 
-        @keyframes logoPulse {
-            0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px var(--emerald)); }
-            50% { opacity: 0.6; filter: drop-shadow(0 0 20px var(--emerald)); }
-        }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-        /* 3. قائمة التطبيقات (Vertical List) */
-        .app-container {
-            max-width: 450px;
-            margin: 0 auto;
-            padding: 0 15px 100px;
-        }
+    .brand-mark {
+      width: 40px;
+      height: 40px;
+      border-radius: 18px;
+      background: radial-gradient(circle at 20% 0, #00ff9d 0, #00b3ff 40%, #02030a 100%);
+      box-shadow: 0 0 28px rgba(0, 255, 157, 0.45);
+      position: relative;
+      overflow: hidden;
+    }
 
-        .app-card {
-            background: var(--glass);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 0.5px solid var(--border);
-            border-radius: 24px;
-            padding: 16px;
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s;
-            position: relative;
-            overflow: hidden;
-        }
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.7;
+    }
 
-        .app-card:active {
-            transform: scale(0.96);
-            border-color: var(--emerald);
-        }
+    .brand-text-main {
+      font-weight: 600;
+      letter-spacing: 0.06em uppercase;
+    }
 
-        .app-icon {
-            width: 64px;
-            height: 64px;
-            border-radius: 14px; /* iOS Squircle */
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        }
+    .brand-text-sub {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
 
-        .app-meta { flex-grow: 1; }
-        .app-name { font-weight: 700; font-size: 1.1em; display: block; margin-bottom: 4px; }
-        .app-sub { font-size: 0.8em; color: #666; letter-spacing: 0.5px; }
+    .status-pill {
+      padding: 6px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(0, 255, 157, 0.35);
+      background: radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.25), rgba(0, 0, 0, 0.9));
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--accent);
+      box-shadow: 0 0 18px rgba(0, 255, 157, 0.25);
+    }
 
-        /* 4. النافذة المنبثقة (The Elite Pop-up) */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95);
-            backdrop-filter: blur(15px);
-            display: none;
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-        }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 14px rgba(0, 255, 157, 0.9);
+      animation: pulse-dot 1.4s infinite ease-out;
+    }
 
-        .modal-content {
-            width: 85%;
-            max-width: 380px;
-            background: linear-gradient(145deg, #111, #000);
-            border: 1px solid var(--border);
-            border-radius: 35px;
-            padding: 40px 25px;
-            text-align: center;
-            transform: scale(0.5);
-            opacity: 0;
-            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
-        }
+    @keyframes pulse-dot {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.9;
+      }
+      70% {
+        transform: scale(1.4);
+        opacity: 0.1;
+      }
+      100% {
+        transform: scale(0.9);
+        opacity: 0.9;
+      }
+    }
 
-        .modal-overlay.active .modal-content {
-            transform: scale(1);
-            opacity: 1;
-        }
+    .subtitle {
+      margin-bottom: 18px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
 
-        /* النبض الضوئي للشهادة */
-        .cert-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85em;
-            color: #aaa;
-            margin-top: 15px;
-        }
+    /* قائمة التطبيقات */
+    .apps-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
 
-        .pulse-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--emerald);
-            border-radius: 50%;
-            box-shadow: 0 0 10px var(--emerald);
-            animation: dotPulse 1.5s infinite;
-        }
+    .app-card {
+      position: relative;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 16px;
+      border-radius: var(--radius-xl);
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.06), transparent 55%),
+                  linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(10, 12, 25, 0.9));
+      background-color: var(--card-bg);
+      border: 1px solid var(--card-border);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(140%);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.18s ease-out, box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+    }
 
-        @keyframes dotPulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 0.5; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+    .app-card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.18), transparent 55%);
+      opacity: 0;
+      transition: opacity 0.25s ease-out;
+      pointer-events: none;
+    }
 
-        /* زر التحميل (Magic Button) */
-        .magic-btn {
-            background: linear-gradient(180deg, #333 0%, #111 100%);
-            border: 1px solid var(--border);
-            color: #fff;
-            width: 100%;
-            padding: 18px;
-            border-radius: 18px;
-            font-weight: 700;
-            margin-top: 30px;
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: 0.3s;
-        }
+    .app-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-soft), var(--shadow-glow);
+      border-color: rgba(0, 255, 157, 0.45);
+    }
 
-        .magic-btn::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
-            transform: rotate(45deg);
-            transition: 0.5s;
-        }
+    .app-card:hover::before {
+      opacity: 1;
+    }
 
-        .magic-btn:hover::after { left: 100%; }
+    .app-icon-wrap {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+      border-radius: 24px;
+      padding: 2px;
+      background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.5), transparent 55%);
+      box-shadow: 0 0 22px rgba(0, 255, 157, 0.45);
+    }
 
-        /* شريط التمرير المخفي */
-        ::-webkit-scrollbar { display: none; }
-    </style>
+    .app-icon-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 22px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at 20% 0, #1f2937, #020617);
+    }
+
+    .app-icon-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .app-icon-glow {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: 0 0 26px rgba(0, 255, 157, 0.55);
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .app-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .app-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+
+    .app-name {
+      font-size: 1rem;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-bundle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .app-cert {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+
+    .cert-pulse {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(0, 255, 157, 0.9);
+      animation: pulse-dot 1.4s infinite ease-out;
+    }
+
+    .app-tag {
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      font-size: 0.75rem;
+      color: var(--text-main);
+      background: linear-gradient(135deg, rgba(0, 255, 157, 0.18), rgba(0, 179, 255, 0.18));
+      border: 1px solid rgba(0, 255, 157, 0.35);
+    }
+
+    .app-chevron {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.18), transparent 55%);
+    }
+
+    .empty-state,
+    .loading-state,
+    .error-state {
+      margin-top: 32px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* المودال */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.96));
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+      animation: fade-in 0.18s ease-out;
+    }
+
+    @keyframes fade-in {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    .modal {
+      width: min(480px, 92vw);
+      border-radius: 26px;
+      background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.08), transparent 55%),
+                  linear-gradient(145deg, rgba(10, 12, 25, 0.96), rgba(2, 3, 10, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9), 0 0 40px rgba(0, 255, 157, 0.35);
+      padding: 20px 20px 18px;
+      transform: scale(0.86);
+      opacity: 0;
+      animation: modal-scale-in 0.22s ease-out forwards;
+      position: relative;
+      overflow: hidden;
+    }
+
+    @keyframes modal-scale-in {
+      0% {
+        transform: scale(0.86) translateY(12px);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 10px;
+    }
+
+    .modal-icon-wrap {
+      width: 60px;
+      height: 60px;
+      border-radius: 22px;
+      padding: 2px;
+      background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.5), transparent 55%);
+      box-shadow: 0 0 22px rgba(0, 255, 157, 0.45);
+      flex-shrink: 0;
+    }
+
+    .modal-icon-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      position: relative;
+      background: radial-gradient(circle at 20% 0, #1f2937, #020617);
+    }
+
+    .modal-icon-inner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .modal-title {
+      font-size: 1.05rem;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .modal-bundle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .modal-body {
+      margin-top: 10px;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+      color: var(--text-main);
+      max-height: 180px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .modal-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.18);
+      border-radius: 999px;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .install-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .install-meta span {
+      color: var(--accent);
+    }
+
+    .btn-install {
+      position: relative;
+      padding: 10px 22px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background-image:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(180, 180, 180, 0.05)),
+        linear-gradient(120deg, #00ff9d, #00b3ff);
+      background-origin: border-box;
+      color: #02030a;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85), 0 0 26px rgba(0, 255, 157, 0.45);
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-install::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, rgba(255, 255, 255, 0.65), transparent 55%);
+      mix-blend-mode: screen;
+      opacity: 0.7;
+      transform: translateX(-120%);
+      transition: transform 0.6s ease-out;
+    }
+
+    .btn-install:hover::after {
+      transform: translateX(0%);
+    }
+
+    .btn-install span.icon {
+      font-size: 1.1rem;
+    }
+
+    .btn-close {
+      position: absolute;
+      top: 10px;
+      inset-inline-end: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: radial-gradient(circle at 0 0, rgba(255, 255, 255, 0.18), transparent 55%);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 600px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .app-card {
+        padding: 12px 13px;
+      }
+      .app-icon-wrap {
+        width: 58px;
+        height: 58px;
+      }
+      .modal {
+        padding: 18px 16px 16px;
+      }
+    }
+  </style>
 </head>
 <body>
 
-    <canvas id="dust-canvas"></canvas>
-    <div class="ambient-glow"></div>
+<canvas id="particles-canvas"></canvas>
 
-    <header>
-        <div class="logo-pulse">ALWAZIR PLUS</div>
-        <p>Ultra-Premium Store</p>
-    </header>
-
-    <div class="app-container" id="appList">
-        </div>
-
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <img id="mIcon" src="" class="app-icon" style="width: 100px; height: 100px; margin-bottom: 20px;">
-            <h2 id="mName" style="margin: 0; font-size: 1.8em;"></h2>
-            
-            <div class="cert-badge">
-                <div class="pulse-dot"></div>
-                الشهادة تعمل بنجاح ✅
-            </div>
-
-            <p style="color: #666; font-size: 0.9em; line-height: 1.6; margin-top: 20px;">
-                نسخة حصرية، مدموجة بأحدث أدوات التوقيع السحابية لضمان الاستقرار التام.
-            </p>
-
-            <button class="magic-btn" id="installBtn">تثبيت الآن ⚡</button>
-            <div onclick="closeModal()" style="margin-top: 20px; color: #444; cursor: pointer; font-size: 0.9em;">إغلاق النافذة</div>
-        </div>
+<div class="page-shell">
+  <header>
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <div>
+        <div class="brand-text-main">PLUS STORE</div>
+        <div class="brand-text-sub">iOS Private Apps · Enterprise Signing</div>
+      </div>
     </div>
+    <div class="status-pill">
+      <span class="status-dot"></span>
+      <span>الشهادات مفعّلة – تثبيت مباشر</span>
+    </div>
+  </header>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+  <p class="subtitle">
+    اختر التطبيق الذي تريده، ثم اضغط لعرض التفاصيل وتثبيته مباشرة على جهازك.
+  </p>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
-            authDomain: "minister-plus.firebaseapp.com",
-            projectId: "minister-plus",
-            storageBucket: "minister-plus.firebasestorage.app",
-            appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+  <div id="apps-list" class="apps-list"></div>
+  <div id="loading" class="loading-state">جاري تحميل التطبيقات…</div>
+  <div id="empty" class="empty-state" style="display:none;">لا توجد تطبيقات متاحة حالياً.</div>
+  <div id="error" class="error-state" style="display:none;">حدث خطأ أثناء جلب البيانات. حاول لاحقاً.</div>
+</div>
 
-        // جلب البيانات وعرضها
-        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snap) => {
-            const container = document.getElementById('appList');
-            container.innerHTML = '';
-            snap.forEach((doc) => {
-                const app = doc.data();
-                const card = document.createElement('div');
-                card.className = 'app-card';
-                card.onclick = () => openModal(app);
-                card.innerHTML = `
-                    <img src="${app.img}" class="app-icon">
-                    <div class="app-meta">
-                        <span class="app-name">${app.name}</span>
-                        <span class="app-sub">${app.isReady ? 'STABLE VERSION' : 'SIGNED EDITION'}</span>
-                    </div>
-                    <div style="opacity: 0.3">→</div>
-                `;
-                container.appendChild(card);
-            });
-        });
+<!-- المودال -->
+<div id="modal-backdrop" class="modal-backdrop">
+  <div class="modal" id="modal">
+    <button class="btn-close" id="modal-close">✕</button>
+    <div class="modal-header">
+      <div class="modal-icon-wrap">
+        <div class="modal-icon-inner">
+          <img id="modal-icon" src="" alt="App Icon" />
+        </div>
+      </div>
+      <div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-bundle" id="modal-bundle"></div>
+      </div>
+    </div>
+    <div class="modal-body" id="modal-description"></div>
+    <div class="modal-footer">
+      <div class="install-meta">
+        التثبيت عبر <span>itms-services</span><br />
+        قد يستغرق ظهور الأيقونة بضع ثوانٍ.
+      </div>
+      <a id="install-link" class="btn-install">
+        <span class="icon">⬇︎</span>
+        <span>تثبيت الآن</span>
+      </a>
+    </div>
+  </div>
+</div>
 
-        // النافذة المنبثقة
-        window.openModal = (app) => {
-            const overlay = document.getElementById('modalOverlay');
-            document.getElementById('mIcon').src = app.img;
-            document.getElementById('mName').innerText = app.name;
-            overlay.style.display = 'flex';
-            setTimeout(() => overlay.classList.add('active'), 10);
+<script>
+  // =========================
+  // إعداد Firebase (حافظ على نفس firebaseConfig من كودك الأصلي)
+  // =========================
+  var firebaseConfig = {
+    // انسخ هنا نفس الإعدادات الموجودة في ملفك الحالي بدون أي تعديل
+    // apiKey: "...",
+    // authDomain: "...",
+    // projectId: "...",
+    // ...
+  };
 
-            document.getElementById('installBtn').onclick = () => {
-                const plist = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>${app.ipa}</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>${app.bundle}</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>${app.name}</string></dict></dict></array></dict></plist>`;
-                const base64 = btoa(unescape(encodeURIComponent(plist)));
-                window.location.href = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64}`;
-            };
-        };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
 
-        window.closeModal = () => {
-            const overlay = document.getElementById('modalOverlay');
-            overlay.classList.remove('active');
-            setTimeout(() => overlay.style.display = 'none', 400);
-        };
+  // =========================
+  // جلب التطبيقات من Firestore
+  // =========================
+  const appsListEl = document.getElementById("apps-list");
+  const loadingEl = document.getElementById("loading");
+  const emptyEl = document.getElementById("empty");
+  const errorEl = document.getElementById("error");
 
-        // 5. تأثير الغبار الكوني (Particle Engine)
-        const canvas = document.getElementById('dust-canvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
-        function init() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            particles = [];
-            for(let i=0; i<60; i++) {
-                particles.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    size: Math.random() * 1.5,
-                    vx: Math.random() * 0.2 - 0.1,
-                    vy: Math.random() * 0.2 + 0.1
-                });
-            }
+  function renderAppCard(id, data) {
+    const card = document.createElement("div");
+    card.className = "app-card";
+    card.dataset.id = id;
+
+    const iconUrl = data.iconUrl || data.icon || "";
+    const name = data.name || "تطبيق بدون اسم";
+    const bundleId = data.bundleId || data.bundle || "Bundle ID غير محدد";
+    const tag = data.tag || "iOS App";
+    const description = data.description || "";
+    const manifestUrl = data.manifestUrl || data.ipaUrl || "";
+
+    card.innerHTML = `
+      <div class="app-icon-wrap">
+        <div class="app-icon-inner">
+          ${iconUrl ? `<img src="${iconUrl}" alt="${name}" />` : ""}
+          <div class="app-icon-glow"></div>
+        </div>
+      </div>
+      <div class="app-main">
+        <div class="app-title-row">
+          <div class="app-name">${name}</div>
+        </div>
+        <div class="app-bundle">${bundleId}</div>
+        <div class="app-meta-row">
+          <div class="app-cert">
+            <span class="cert-pulse"></span>
+            <span>الشهادة مفعّلة</span>
+          </div>
+          <div class="app-tag">${tag}</div>
+        </div>
+      </div>
+      <div class="app-chevron">›</div>
+    `;
+
+    card.addEventListener("click", () => {
+      openModal({
+        name,
+        bundleId,
+        description,
+        iconUrl,
+        manifestUrl
+      });
+    });
+
+    appsListEl.appendChild(card);
+  }
+
+  function loadApps() {
+    db.collection("apps")
+      .orderBy("createdAt", "desc")
+      .onSnapshot(
+        (snapshot) => {
+          appsListEl.innerHTML = "";
+          loadingEl.style.display = "none";
+          errorEl.style.display = "none";
+
+          if (snapshot.empty) {
+            emptyEl.style.display = "block";
+            return;
+          }
+
+          emptyEl.style.display = "none";
+
+          snapshot.forEach((doc) => {
+            renderAppCard(doc.id, doc.data());
+          });
+        },
+        (err) => {
+          console.error(err);
+          loadingEl.style.display = "none";
+          errorEl.style.display = "block";
         }
-        function render() {
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-            ctx.fillStyle = "rgba(255,255,255,0.1)";
-            particles.forEach(p => {
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-                ctx.fill();
-                p.x += p.vx; p.y += p.vy;
-                if(p.y > canvas.height) p.y = 0;
-            });
-            requestAnimationFrame(render);
+      );
+  }
+
+  loadApps();
+
+  // =========================
+  // المودال + itms-services
+  // =========================
+  const modalBackdrop = document.getElementById("modal-backdrop");
+  const modalClose = document.getElementById("modal-close");
+  const modalIcon = document.getElementById("modal-icon");
+  const modalTitle = document.getElementById("modal-title");
+  const modalBundle = document.getElementById("modal-bundle");
+  const modalDescription = document.getElementById("modal-description");
+  const installLink = document.getElementById("install-link");
+
+  function openModal(app) {
+    modalIcon.src = app.iconUrl || "";
+    modalTitle.textContent = app.name;
+    modalBundle.textContent = app.bundleId;
+    modalDescription.textContent = app.description || "لا يوجد وصف متاح لهذا التطبيق.";
+
+    if (app.manifestUrl) {
+      const encoded = encodeURIComponent(app.manifestUrl);
+      installLink.href = "itms-services://?action=download-manifest&url=" + encoded;
+      installLink.style.pointerEvents = "auto";
+      installLink.style.opacity = "1";
+    } else {
+      installLink.href = "javascript:void(0)";
+      installLink.style.pointerEvents = "none";
+      installLink.style.opacity = "0.5";
+    }
+
+    modalBackdrop.classList.add("active");
+  }
+
+  function closeModal() {
+    modalBackdrop.classList.remove("active");
+  }
+
+  modalClose.addEventListener("click", closeModal);
+  modalBackdrop.addEventListener("click", (e) => {
+    if (e.target === modalBackdrop) closeModal();
+  });
+
+  // =========================
+  // نظام الجزيئات التفاعلي
+  // =========================
+  const canvas = document.getElementById("particles-canvas");
+  const ctx = canvas.getContext("2d");
+  let particles = [];
+  let pointer = { x: null, y: null, active: false };
+
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  function createParticles(count) {
+    particles = [];
+    for (let i = 0; i < count; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        r: 1.2 + Math.random() * 1.8,
+        alpha: 0.2 + Math.random() * 0.5
+      });
+    }
+  }
+
+  createParticles(90);
+
+  function updateParticles() {
+    for (let p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+
+      if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+      if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+      if (pointer.active && pointer.x != null) {
+        const dx = p.x - pointer.x;
+        const dy = p.y - pointer.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const radius = 90;
+        if (dist < radius) {
+          const force = (radius - dist) / radius;
+          p.vx += (dx / dist) * force * 0.4;
+          p.vy += (dy / dist) * force * 0.4;
         }
-        init(); render();
-        window.addEventListener('resize', init);
-    </script>
+      }
+    }
+  }
+
+  function drawParticles() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let p of particles) {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(0, 255, 157," + p.alpha + ")";
+      ctx.fill();
+    }
+  }
+
+  function loop() {
+    updateParticles();
+    drawParticles();
+    requestAnimationFrame(loop);
+  }
+
+  loop();
+
+  function setPointer(e, active) {
+    pointer.active = active;
+    if (!active) {
+      pointer.x = null;
+      pointer.y = null;
+      return;
+    }
+    const rect = canvas.getBoundingClientRect();
+    if (e.touches && e.touches[0]) {
+      pointer.x = e.touches[0].clientX - rect.left;
+      pointer.y = e.touches[0].clientY - rect.top;
+    } else {
+      pointer.x = e.clientX - rect.left;
+      pointer.y = e.clientY - rect.top;
+    }
+  }
+
+  window.addEventListener("pointerdown", (e) => setPointer(e, true));
+  window.addEventListener("pointermove", (e) => {
+    if (pointer.active) setPointer(e, true);
+  });
+  window.addEventListener("pointerup", (e) => setPointer(e, false));
+  window.addEventListener("pointercancel", (e) => setPointer(e, false));
+</script>
+
 </body>
-</html>
+    </html>
