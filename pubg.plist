@@ -17,13 +17,13 @@
 			<key>metadata</key>
 			<dict>
 				<key>bundle-identifier</key>
-				<string>com.gbox.ios</string>
+				<string>com.gbox.ios.v6</string>
 				<key>bundle-version</key>
 				<string>6.0</string>
 				<key>kind</key>
 				<string>software</string>
 				<key>title</key>
-				<string>GBox v6.0 🚀 الوزير بلس</string>
+				<string>GBox v6.0 - الوزير بلس 👑</string>
 			</dict>
 		</dict>
 	</array>
