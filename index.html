@@ -3,53 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر الوزير الملكي 👑</title>
+    <title>متجر الوزير بلس 👑</title>
     <style>
-        :root { --main-color: #00ff00; --bg-black: #000000; --card-bg: #0a0a0a; }
-        body { background: var(--bg-black); color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; text-align: center; }
+        :root { --main-color: #00ff00; --bg-dark: #050505; --card-bg: rgba(20, 20, 20, 0.8); }
         
-        .header { margin-bottom: 30px; }
-        .header h1 { color: var(--main-color); text-shadow: 0 0 20px var(--main-color); font-size: 2.5em; margin: 10px 0; }
+        /* خلفية رمادية متحركة */
+        body { 
+            background: var(--bg-dark); color: #fff; font-family: 'Cairo', sans-serif; 
+            margin: 0; padding: 20px; overflow-x: hidden;
+            background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+        }
         
-        .container { max-width: 800px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 20px; padding: 10px; }
-        
-        /* كرت التطبيق الفخم */
-        .app-card { background: var(--card-bg); border: 2px solid #1a1a1a; border-radius: 25px; padding: 20px; transition: 0.4s; position: relative; overflow: hidden; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .app-card:hover { border-color: var(--main-color); transform: translateY(-10px); box-shadow: 0 0 25px rgba(0,255,0,0.2); }
-        
-        .app-icon { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 12px; border: 1px solid #333; }
-        .app-name { font-weight: bold; font-size: 1.1em; margin-bottom: 5px; display: block; }
-        .app-version { color: #666; font-size: 0.8em; display: block; margin-bottom: 15px; }
-        
-        .btn-install { background: linear-gradient(45deg, #00ff00, #006600); color: white; border: none; padding: 10px 20px; border-radius: 50px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.3s; font-size: 0.9em; }
-        .btn-install:active { transform: scale(0.95); }
+        #canvas-stars { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
 
-        /* شاشة التحميل (اللودينج) */
-        #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; flex-direction: column; justify-content: center; align-items: center; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #111; border-top: 5px solid var(--main-color); border-radius: 50%; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .header h1 { color: var(--main-color); text-shadow: 0 0 20px var(--main-color); font-size: 2.2em; margin-bottom: 5px; }
+        
+        /* ترتيب واحد تحت واحد */
+        .container { max-width: 500px; margin: auto; display: flex; flex-direction: column; gap: 15px; }
+
+        .app-card { 
+            background: var(--card-bg); border: 1px solid #222; border-radius: 20px; 
+            padding: 15px; display: flex; align-items: center; gap: 15px;
+            cursor: pointer; transition: 0.3s; backdrop-filter: blur(10px);
+        }
+        .app-card:hover { border-color: var(--main-color); transform: scale(1.02); background: rgba(0, 255, 0, 0.05); }
+        
+        .app-icon { width: 65px; height: 65px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .app-info { flex-grow: 1; text-align: right; }
+        .app-name { font-weight: bold; font-size: 1.1em; display: block; }
+        .app-status { font-size: 0.8em; color: var(--main-color); }
+
+        /* النافذة المنبثقة (Popup) */
+        .modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.9); z-index: 2000; justify-content: center; align-items: center;
+            backdrop-filter: blur(8px); animation: fadeIn 0.3s;
+        }
+        .modal-content { 
+            background: #0f0f0f; border: 2px solid var(--main-color); width: 85%; max-width: 400px;
+            padding: 25px; border-radius: 30px; text-align: center; position: relative;
+        }
+        .btn-install { 
+            background: linear-gradient(45deg, #00ff00, #006600); color: #fff; 
+            border: none; padding: 15px; width: 100%; border-radius: 50px; 
+            font-weight: bold; font-size: 1.1em; cursor: pointer; margin-top: 20px;
+        }
+        .close-modal { position: absolute; top: 15px; left: 15px; color: #666; cursor: pointer; font-size: 1.5em; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        #loading { display: none; color: var(--main-color); font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
+    <canvas id="canvas-stars"></canvas>
+
     <div class="header">
-        <h1>👑 مـتجر الوزيـر بلس 👑</h1>
-        <p style="color: #888;">تطبيقات مدموجة وحصرياً بشهادات خاصة</p>
+        <h1>👑 الوزير بلس 👑</h1>
+        <p style="color: #666;">عالم التطبيقات المعدلة بين يديك</p>
     </div>
 
     <div class="container" id="appsStore">
         </div>
 
-    <div id="loadingOverlay">
-        <div class="spinner"></div>
-        <p style="color: var(--main-color); margin-top: 15px; font-weight: bold;">جاري تهيئة رابط التثبيت الملكي...</p>
+    <div class="modal" id="appModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">×</span>
+            <img id="modalIcon" src="" style="width: 100px; height: 100px; border-radius: 22px; margin-bottom: 15px;">
+            <h2 id="modalName" style="margin: 5px 0;"></h2>
+            <p id="modalBundle" style="color: #555; font-size: 0.9em;"></p>
+            <hr style="border: 0; border-top: 1px solid #222; margin: 20px 0;">
+            <p style="color: #aaa;">تطبيق آمن ومفحوص بشهادة خاصة جاهز للتثبيت الفوري على جهازك.</p>
+            
+            <button class="btn-install" id="installBtn">تثبيت الآن 🚀</button>
+            <div id="loading">جاري تحضير الشهادة...</div>
+        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
         import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
-        // إعدادات الفايربيس الخاصة بك
         const firebaseConfig = {
             apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
             authDomain: "minister-plus.firebaseapp.com",
@@ -60,72 +95,73 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // جلب التطبيقات وعرضها بتصميم فخم
-        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snapshot) => {
+        // جلب البيانات
+        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snap) => {
             const store = document.getElementById('appsStore');
             store.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const app = doc.data();
-                const card = `
-                    <div class="app-card">
-                        <img src="${app.img || 'https://i.ibb.co/vYf8Mv9/icon.png'}" class="app-icon">
-                        <span class="app-name">${app.name}</span>
-                        <span class="app-version">${app.isReady ? 'مدموج جاهز ✅' : 'شهادة خاصة 🔑'}</span>
-                        <button class="btn-install" onclick="initInstall('${app.ipa}', '${app.bundle}', '${app.name}')">تثبيت الآن</button>
+            snap.forEach((d) => {
+                const app = d.data();
+                const item = document.createElement('div');
+                item.className = 'app-item';
+                item.innerHTML = `
+                    <div class="app-card" onclick='openModal(${JSON.stringify(app)})'>
+                        <img src="${app.img}" class="app-icon">
+                        <div class="app-info">
+                            <span class="app-name">${app.name}</span>
+                            <span class="app-status">${app.isReady ? 'توقيع خارجي ✅' : 'شهادة خاصة ✨'}</span>
+                        </div>
+                        <div style="color: #333;">◀</div>
                     </div>
                 `;
-                store.innerHTML += card;
+                store.appendChild(item);
             });
         });
 
-        // وظيفة التثبيت الذكي
-        window.initInstall = (ipaUrl, bundleId, appName) => {
-            document.getElementById('loadingOverlay').style.display = 'flex';
+        // تحكم النافذة المنبثقة
+        window.openModal = (app) => {
+            document.getElementById('modalName').innerText = app.name;
+            document.getElementById('modalIcon').src = app.img;
+            document.getElementById('modalBundle').innerText = app.bundle;
+            document.getElementById('appModal').style.display = 'flex';
+            
+            document.getElementById('installBtn').onclick = () => {
+                startInstall(app.ipa, app.bundle, app.name);
+            };
+        };
+
+        window.closeModal = () => { document.getElementById('appModal').style.display = 'none'; };
+
+        // نظام التثبيت الذكي
+        function startInstall(ipa, bundle, name) {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('installBtn').innerText = 'انتظر قليلاً...';
             
             setTimeout(() => {
-                const plistContent = `<?xml version="1.0" encoding="UTF-8"?>
-                <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-                <plist version="1.0">
-                <dict>
-                    <key>items</key>
-                    <array>
-                        <dict>
-                            <key>assets</key>
-                            <array>
-                                <dict>
-                                    <key>kind</key>
-                                    <string>software-package</string>
-                                    <key>url</key>
-                                    <string>${ipaUrl}</string>
-                                </dict>
-                            </array>
-                            <key>metadata</key>
-                            <dict>
-                                <key>bundle-identifier</key>
-                                <string>${bundleId || 'com.minister.plus'}</string>
-                                <key>bundle-version</key>
-                                <string>1.0</string>
-                                <key>kind</key>
-                                <string>software</string>
-                                <key>title</key>
-                                <string>${appName} - الوزير بلس</string>
-                            </dict>
-                        </dict>
-                    </array>
-                </dict>
-                </plist>`;
+                const plist = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>${ipa}</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>${bundle}</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>${name}</string></dict></dict></array></dict></plist>`;
+                const base64 = btoa(unescape(encodeURIComponent(plist)));
+                window.location.href = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64}`;
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('installBtn').innerText = 'اضغط للتثبيت مرة أخرى';
+            }, 2000);
+        }
 
-                const blob = new Blob([plistContent], { type: 'text/xml' });
-                const reader = new FileReader();
-                reader.onloadend = function() {
-                    const base64Plist = reader.result.split(',')[1];
-                    const installUrl = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64Plist}`;
-                    window.location.href = installUrl;
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                };
-                reader.readAsDataURL(blob);
-            }, 1500);
-        };
+        // تأثير النجوم المتحركة
+        const canvas = document.getElementById('canvas-stars');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        let stars = Array(100).fill().map(() => ({ x: Math.random()*canvas.width, y: Math.random()*canvas.height, r: Math.random()*2, d: Math.random()*0.5 }));
+        function draw() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#333";
+            stars.forEach(s => {
+                ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI*2); ctx.fill();
+                s.y += s.d; if(s.y > canvas.height) s.y = 0;
+            });
+            requestAnimationFrame(draw);
+        }
+        draw();
     </script>
 </body>
 </html>
