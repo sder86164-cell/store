@@ -11,19 +11,19 @@
                     <key>kind</key>
                     <string>software-package</string>
                     <key>url</key>
-                    <string>HERE_IPA_URL</string>
+                    <string>https://github.com/sder86164-cell/store/raw/refs/heads/main/GBox_v6.0.ipa</string>
                 </dict>
             </array>
             <key>metadata</key>
             <dict>
                 <key>bundle-identifier</key>
-                <string>com.minister.app</string>
+                <string>com.gbox.ios</string>
                 <key>bundle-version</key>
-                <string>1.0</string>
+                <string>6.0</string>
                 <key>kind</key>
                 <string>software</string>
                 <key>title</key>
-                <string>تثبيت التطبيق المدموج 🚀</string>
+                <string>GBox v6.0 - الوزير بلس 👑</string>
             </dict>
         </dict>
     </array>
