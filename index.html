@@ -3,37 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>متجر الوزير بلس 🔥</title>
+    <title>الوزير بلس 🔥</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
-        body { background: #000; color: white; font-family: sans-serif; margin: 0; padding: 0; overflow-x: hidden; }
-        /* القائمة الجانبية */
-        .menu-btn { position: fixed; top: 15px; right: 15px; font-size: 30px; cursor: pointer; color: red; z-index: 1001; }
-        .sidebar { position: fixed; right: -280px; top: 0; width: 260px; height: 100%; background: #111; transition: 0.3s; padding: 20px; border-left: 2px solid red; z-index: 1000; }
-        .sidebar.active { right: 0; }
+        body { background: #000; color: white; font-family: sans-serif; margin: 0; overflow-x: hidden; }
+        .header { padding: 50px 20px; text-align: center; background: linear-gradient(to bottom, #700, #000); border-bottom: 2px solid red; }
+        .grid { padding: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 20px; }
+        .app-card { background: #0a0a0a; border-radius: 20px; padding: 15px; text-align: center; border: 1px solid #222; transition: 0.3s; }
+        .app-card:hover { border-color: red; transform: scale(1.05); }
+        .app-icon { width: 75px; height: 75px; border-radius: 18px; box-shadow: 0 0 15px rgba(255,0,0,0.3); }
         
-        header { padding: 60px 20px; text-align: center; background: linear-gradient(to bottom, #700, #000); }
-        .app-item { background: #111; margin: 15px; padding: 15px; border-radius: 18px; display: flex; align-items: center; border: 1px solid #222; }
-        .app-img { width: 65px; height: 65px; border-radius: 15px; margin-left: 15px; border: 1px solid #333; }
-        .info { flex-grow: 1; }
-        .install-btn { background: red; color: white; border: none; padding: 10px 25px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        /* مودال صفحة الوصف */
+        #modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.97); display: none; z-index: 9999; padding: 40px 20px; box-sizing: border-box; text-align: center; }
+        .m-content { max-width: 450px; margin: auto; }
+        .install-btn { background: red; color: white; width: 100%; padding: 18px; border-radius: 50px; border: none; font-weight: bold; font-size: 20px; cursor: pointer; margin-top: 30px; box-shadow: 0 0 20px red; }
     </style>
 </head>
 <body>
 
-    <div class="menu-btn" onclick="toggleMenu()">☰</div>
-    
-    <div class="sidebar" id="sidebar">
-        <h2 style="color:red; margin-top:40px;">الوزير بلس 👑</h2>
-        <hr border="1" color="red">
-        <p style="font-size:14px; line-height:1.6;">حمل تطبيقاتك الآن من موقع الوزير قبل أن تصبح مدفوعة في الأيام القادمة.. انشر الموقع لأخوياك! 🔥</p>
-        <div style="position:absolute; bottom:20px; font-size:12px; color:gray;">جميع الحقوق محفوظة لفريق الوزير 2026 ©</div>
+    <div class="header animate__animated animate__fadeInDown">
+        <h1 style="font-size:38px; text-shadow: 0 0 20px red;">الوزير بلس 👑</h1>
+        <p style="color:#ccc;">التطبيقات المدموجة بأقوى الشهادات</p>
     </div>
 
-    <header>
-        <h1 style="margin:0; font-size:35px; text-shadow: 0 0 15px red;">الوزير بلس 🔥</h1>
-    </header>
+    <div id="apps" class="grid"></div>
 
-    <div id="apps-list" style="padding-bottom: 50px;">جاري جلب تطبيقات الوزير...</div>
+    <div id="modal" class="animate__animated animate__fadeInUp">
+        <div class="m-content">
+            <img id="m-icon" src="" style="width:120px; border-radius:25px; border: 2px solid red;">
+            <h2 id="m-title" style="font-size:28px; margin-top:20px;"></h2>
+            <p id="m-bundle" style="color:red; font-size:14px;"></p>
+            <div style="background:#111; padding:20px; border-radius:15px; margin-top:20px; text-align:right;">
+                <p id="m-desc" style="white-space: pre-wrap; line-height:1.6;"></p>
+            </div>
+            <button class="install-btn" id="m-link">تثبيت التطبيق 🚀</button>
+            <button onclick="closeM()" style="background:none; border:none; color:gray; margin-top:30px; cursor:pointer;">إغلاق العرض</button>
+        </div>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -44,40 +50,35 @@
             authDomain: "minister-plus.firebaseapp.com",
             projectId: "minister-plus",
             storageBucket: "minister-plus.firebasestorage.app",
-            messagingSenderId: "438719729037",
             appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.toggleMenu = () => document.getElementById('sidebar').classList.toggle('active');
-
-        const q = query(collection(db, "apps"), orderBy("time", "desc"));
-        onSnapshot(q, (snapshot) => {
-            const list = document.getElementById('apps-list');
-            list.innerHTML = '';
-            snapshot.forEach((doc) => {
-                const appData = doc.data();
-                list.innerHTML += `
-                    <div class="app-item">
-                        <img src="${appData.icon}" class="app-img">
-                        <div class="info">
-                            <strong>${appData.name}</strong><br>
-                            <small style="color:#888;">${appData.desc}</small>
-                        </div>
-                        <button class="install-btn" onclick="installApp('${appData.ipa}')">تثبيت</button>
-                    </div>
-                `;
+        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snap) => {
+            const container = document.getElementById('apps');
+            container.innerHTML = '';
+            snap.forEach((d) => {
+                const data = d.data();
+                const card = document.createElement('div');
+                card.className = 'app-card animate__animated animate__zoomIn';
+                card.innerHTML = `<img src="${data.img}" class="app-icon"><br><small>${data.name}</small>`;
+                card.onclick = () => {
+                    document.getElementById('m-title').innerText = data.name;
+                    document.getElementById('m-icon').src = data.img;
+                    document.getElementById('m-bundle').innerText = data.bundle;
+                    document.getElementById('m-desc').innerText = data.desc;
+                    document.getElementById('m-link').onclick = () => {
+                         location.href = `itms-services://?action=download-manifest&url=https://sder86164-cell.github.io/store/pubg.plist`;
+                    };
+                    document.getElementById('modal').style.display = 'block';
+                };
+                container.appendChild(card);
             });
         });
 
-        window.installApp = (ipaUrl) => {
-            if(confirm("هل تريد تثبيت هذا التطبيق؟")) {
-                const plist = `https://sder86164-cell.github.io/store/pubg.plist`;
-                location.href = `itms-services://?action=download-manifest&url=${plist}`;
-            }
-        };
+        window.closeM = () => document.getElementById('modal').style.display = 'none';
     </script>
 </body>
 </html>
