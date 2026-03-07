@@ -1,957 +1,329 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>iPhone Plus Store – الوزير بلس</title>
-  <style>
-    :root {
-      --bg-main: #020308;
-      --glass-bg: rgba(10, 10, 15, 0.72);
-      --glass-border: rgba(255, 255, 255, 0.08);
-      --accent-gold: #f5c76b;
-      --accent-emerald: #3fe0a8;
-      --text-main: #f5f5f7;
-      --text-muted: #8e8e93;
-      --danger: #ff453a;
-      --radius-card: 22px;
-      --transition-fast: 180ms ease-out;
-      --transition-med: 260ms cubic-bezier(0.22, 0.61, 0.36, 1);
-      --blur-glass: 22px;
-    }
-
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: radial-gradient(circle at top, #050816 0, #020308 40%, #000000 100%);
-      color: var(--text-main);
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-      overflow: hidden;
-    }
-
-    body {
-      position: relative;
-    }
-
-    /* Custom scrollbar (effectively hidden) */
-    ::-webkit-scrollbar {
-      width: 3px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.08);
-      border-radius: 999px;
-    }
-
-    /* Loading overlay */
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, #050816 0, #020308 40%, #000000 100%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .loading-logo {
-      width: 96px;
-      height: 96px;
-      border-radius: 28px;
-      background: radial-gradient(circle at 20% 0, #ffffff 0, #f5c76b 18%, #020308 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #020308;
-      font-weight: 700;
-      font-size: 22px;
-      letter-spacing: 1px;
-      box-shadow:
-        0 0 40px rgba(245, 199, 107, 0.45),
-        0 0 80px rgba(0, 0, 0, 0.9);
-      animation: pulseGlow 1.4s ease-in-out infinite;
-    }
-
-    .loading-text {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    @keyframes pulseGlow {
-      0% {
-        transform: scale(1);
-        box-shadow:
-          0 0 24px rgba(245, 199, 107, 0.35),
-          0 0 60px rgba(0, 0, 0, 0.9);
-      }
-      50% {
-        transform: scale(1.06);
-        box-shadow:
-          0 0 50px rgba(245, 199, 107, 0.7),
-          0 0 110px rgba(0, 0, 0, 1);
-      }
-      100% {
-        transform: scale(1);
-        box-shadow:
-          0 0 24px rgba(245, 199, 107, 0.35),
-          0 0 60px rgba(0, 0, 0, 0.9);
-      }
-    }
-
-    /* Particle background */
-    .particle-layer {
-      position: fixed;
-      inset: 0;
-      overflow: hidden;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    .particle {
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent);
-      opacity: 0.15;
-      animation: floatParticle linear infinite;
-    }
-
-    @keyframes floatParticle {
-      0% {
-        transform: translate3d(0, 0, 0) scale(1);
-        opacity: 0;
-      }
-      10% {
-        opacity: 0.25;
-      }
-      90% {
-        opacity: 0.25;
-      }
-      100% {
-        transform: translate3d(0, -40px, 0) scale(1.2);
-        opacity: 0;
-      }
-    }
-
-    /* Ambient glows behind content */
-    .ambient-glow {
-      position: fixed;
-      width: 420px;
-      height: 420px;
-      border-radius: 50%;
-      filter: blur(80px);
-      opacity: 0.35;
-      mix-blend-mode: screen;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    .ambient-gold {
-      background: radial-gradient(circle, rgba(245, 199, 107, 0.9), transparent 60%);
-      top: 60%;
-      right: -120px;
-      animation: driftGlow 18s ease-in-out infinite alternate;
-    }
-
-    .ambient-emerald {
-      background: radial-gradient(circle, rgba(63, 224, 168, 0.9), transparent 60%);
-      top: 10%;
-      left: -140px;
-      animation: driftGlow 22s ease-in-out infinite alternate;
-    }
-
-    @keyframes driftGlow {
-      0% {
-        transform: translate3d(0, 0, 0);
-        opacity: 0.25;
-      }
-      50% {
-        transform: translate3d(40px, -40px, 0);
-        opacity: 0.4;
-      }
-      100% {
-        transform: translate3d(-20px, 20px, 0);
-        opacity: 0.3;
-      }
-    }
-
-    /* Main layout */
-    .app-shell {
-      position: relative;
-      z-index: 1;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      padding: env(safe-area-inset-top, 16px) 16px env(safe-area-inset-bottom, 16px);
-      max-width: 480px;
-      margin: 0 auto;
-    }
-
-    .app-header {
-      padding: 8px 4px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .brand-block {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .brand-mark {
-      width: 32px;
-      height: 32px;
-      border-radius: 12px;
-      background: radial-gradient(circle at 20% 0, #ffffff 0, #f5c76b 18%, #020308 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      font-weight: 700;
-      color: #020308;
-      box-shadow:
-        0 0 18px rgba(245, 199, 107, 0.6),
-        0 0 40px rgba(0, 0, 0, 0.9);
-    }
-
-    .brand-text-main {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .brand-text-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .status-pill {
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 0.5px solid rgba(255, 255, 255, 0.16);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.4));
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 11px;
-      color: var(--text-muted);
-      backdrop-filter: blur(18px);
-    }
-
-    .status-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--accent-emerald), transparent);
-      box-shadow: 0 0 10px rgba(63, 224, 168, 0.9);
-      animation: pulseDot 1.4s ease-in-out infinite;
-    }
-
-    @keyframes pulseDot {
-      0% { transform: scale(1); opacity: 0.7; }
-      50% { transform: scale(1.4); opacity: 1; }
-      100% { transform: scale(1); opacity: 0.7; }
-    }
-
-    .app-title {
-      padding: 4px 4px 10px;
-    }
-
-    .app-title-main {
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .app-title-sub {
-      margin-top: 4px;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .app-list-wrapper {
-      flex: 1;
-      overflow-y: auto;
-      padding: 4px 2px 8px;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .app-card {
-      position: relative;
-      margin: 8px 0;
-      padding: 12px 14px;
-      border-radius: var(--radius-card);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.7));
-      border: 0.5px solid var(--glass-border);
-      backdrop-filter: blur(var(--blur-glass));
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      transform-origin: center;
-      transition:
-        transform var(--transition-fast),
-        box-shadow var(--transition-fast),
-        border-color var(--transition-fast),
-        background var(--transition-fast);
-      box-shadow:
-        0 18px 40px rgba(0, 0, 0, 0.85),
-        0 0 0 rgba(245, 199, 107, 0);
-    }
-
-    .app-card::before {
-      content: "";
-      position: absolute;
-      inset: -1px;
-      border-radius: inherit;
-      background: radial-gradient(circle at 0 0, rgba(245, 199, 107, 0.18), transparent 55%);
-      opacity: 0;
-      transition: opacity var(--transition-fast);
-      pointer-events: none;
-    }
-
-    .app-card:active,
-    .app-card.app-card-tap {
-      transform: scale(1.05);
-      box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.95),
-        0 0 32px rgba(245, 199, 107, 0.35);
-      border-color: rgba(245, 199, 107, 0.6);
-      background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(0, 0, 0, 0.9));
-    }
-
-    .app-card:active::before,
-    .app-card.app-card-tap::before {
-      opacity: 1;
-    }
-
-    .app-card.app-card-haptic {
-      animation: hapticShake 120ms ease-out;
-    }
-
-    @keyframes hapticShake {
-      0% { transform: scale(1.05) translateX(0); }
-      25% { transform: scale(1.05) translateX(-1px); }
-      50% { transform: scale(1.05) translateX(1px); }
-      75% { transform: scale(1.05) translateX(-0.5px); }
-      100% { transform: scale(1.05) translateX(0); }
-    }
-
-    .app-icon {
-      width: 46px;
-      height: 46px;
-      border-radius: 16px;
-      background: radial-gradient(circle at 20% 0, #ffffff 0, #f5c76b 18%, #020308 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      font-weight: 700;
-      color: #020308;
-      box-shadow:
-        0 0 18px rgba(245, 199, 107, 0.6),
-        0 0 40px rgba(0, 0, 0, 0.9);
-      flex-shrink: 0;
-    }
-
-    .app-icon-alt {
-      background: radial-gradient(circle at 20% 0, #ffffff 0, #3fe0a8 18%, #020308 70%);
-      box-shadow:
-        0 0 18px rgba(63, 224, 168, 0.6),
-        0 0 40px rgba(0, 0, 0, 0.9);
-    }
-
-    .app-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .app-name {
-      font-size: 14px;
-      font-weight: 500;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .app-meta {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .badge {
-      padding: 2px 8px;
-      border-radius: 999px;
-      border: 0.5px solid rgba(255, 255, 255, 0.16);
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .rating {
-      display: flex;
-      align-items: center;
-      gap: 3px;
-    }
-
-    .rating-star {
-      color: var(--accent-gold);
-      font-size: 11px;
-    }
-
-    .app-size {
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .chevron {
-      font-size: 16px;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
-
-    /* Modal / Pop-up */
-    .modal-backdrop {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at top, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.98));
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 20;
-      padding: 16px;
-    }
-
-    .modal-backdrop.active {
-      display: flex;
-    }
-
-    .modal-panel {
-      position: relative;
-      width: 100%;
-      max-width: 420px;
-      border-radius: 26px;
-      padding: 18px 16px 16px;
-      background:
-        radial-gradient(circle at 0 0, rgba(245, 199, 107, 0.18), transparent 55%),
-        linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.9));
-      border: 0.5px solid rgba(255, 255, 255, 0.18);
-      box-shadow:
-        0 28px 80px rgba(0, 0, 0, 0.95),
-        0 0 40px rgba(245, 199, 107, 0.35);
-      backdrop-filter: blur(26px);
-      transform-origin: center;
-      transform: scale(0.7) translateY(20px);
-      opacity: 0;
-      filter: blur(12px);
-      transition:
-        transform var(--transition-med),
-        opacity var(--transition-med),
-        filter var(--transition-med);
-    }
-
-    .modal-backdrop.active .modal-panel {
-      transform: scale(1) translateY(0);
-      opacity: 1;
-      filter: blur(0);
-    }
-
-    .modal-close {
-      position: absolute;
-      top: 10px;
-      inset-inline-end: 10px;
-      width: 26px;
-      height: 26px;
-      border-radius: 999px;
-      border: 0.5px solid rgba(255, 255, 255, 0.18);
-      background: rgba(0, 0, 0, 0.6);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 14px;
-      color: var(--text-muted);
-      cursor: pointer;
-      backdrop-filter: blur(18px);
-    }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-      margin-top: 6px;
-    }
-
-    .modal-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 20px;
-      background: radial-gradient(circle at 20% 0, #ffffff 0, #f5c76b 18%, #020308 70%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      font-weight: 700;
-      color: #020308;
-      box-shadow:
-        0 0 22px rgba(245, 199, 107, 0.7),
-        0 0 50px rgba(0, 0, 0, 0.95);
-      flex-shrink: 0;
-    }
-
-    .modal-title-block {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .modal-app-name {
-      font-size: 16px;
-      font-weight: 600;
-      margin-bottom: 2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .modal-app-sub {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .modal-cert {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      margin: 10px 0 12px;
-      font-size: 12px;
-    }
-
-    .modal-cert-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: radial-gradient(circle, var(--accent-emerald), transparent);
-      box-shadow: 0 0 14px rgba(63, 224, 168, 0.9);
-      animation: pulseDot 1.4s ease-in-out infinite;
-      flex-shrink: 0;
-    }
-
-    .modal-cert-text {
-      color: var(--accent-emerald);
-    }
-
-    .modal-body {
-      font-size: 12px;
-      color: var(--text-muted);
-      line-height: 1.5;
-      margin-bottom: 14px;
-    }
-
-    .modal-meta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 14px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .modal-meta-row span {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    /* Brushed metal button */
-    .download-btn {
-      position: relative;
-      width: 100%;
-      border-radius: 999px;
-      padding: 11px 16px;
-      border: 0.5px solid rgba(255, 255, 255, 0.35);
-      background:
-        linear-gradient(120deg, rgba(255, 255, 255, 0.18), rgba(0, 0, 0, 0.9)),
-        repeating-linear-gradient(
-          -45deg,
-          rgba(255, 255, 255, 0.18) 0,
-          rgba(255, 255, 255, 0.18) 1px,
-          rgba(0, 0, 0, 0.9) 2px,
-          rgba(0, 0, 0, 0.9) 3px
-        );
-      color: var(--text-main);
-      font-size: 13px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      cursor: pointer;
-      overflow: hidden;
-      box-shadow:
-        0 18px 40px rgba(0, 0, 0, 0.9),
-        0 0 26px rgba(245, 199, 107, 0.4);
-      transition:
-        transform 140ms ease-out,
-        box-shadow 140ms ease-out,
-        border-color 140ms ease-out;
-    }
-
-    .download-btn::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        120deg,
-        transparent 0%,
-        rgba(255, 255, 255, 0.6) 40%,
-        transparent 80%
-      );
-      transform: translateX(-120%);
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .download-btn:hover::before,
-    .download-btn:active::before {
-      animation: metalSweep 900ms ease-out;
-      opacity: 1;
-    }
-
-    @keyframes metalSweep {
-      0% { transform: translateX(-120%); opacity: 0; }
-      30% { opacity: 1; }
-      100% { transform: translateX(120%); opacity: 0; }
-    }
-
-    .download-btn:active {
-      transform: scale(0.97);
-      box-shadow:
-        0 10px 26px rgba(0, 0, 0, 0.9),
-        0 0 18px rgba(245, 199, 107, 0.4);
-      border-color: rgba(245, 199, 107, 0.8);
-    }
-
-    .download-icon {
-      font-size: 16px;
-    }
-
-    .modal-footer-note {
-      margin-top: 10px;
-      font-size: 10px;
-      color: var(--text-muted);
-      text-align: center;
-    }
-
-    /* Responsive tweaks */
-    @media (max-width: 380px) {
-      .app-shell {
-        padding-inline: 12px;
-      }
-      .app-card {
-        padding: 10px 12px;
-      }
-      .modal-panel {
-        padding-inline: 14px;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>الوزير بلس | الفخامة المطلقة 👑</title>
+    <style>
+        /* استيراد خط مشابه لـ SF Pro الخاص بآبل */
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;500;700&display=swap');
+
+        :root {
+            --gold-royal: #d4af37;
+            --emerald: #00ff88;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
+            --bg-black: #000000;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: 'Tajawal', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-black);
+            margin: 0;
+            color: #fff;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* 1. الغبار الكوني (Cosmic Dust) */
+        #dust-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* الإضاءة النيون الخافتة (Ambient Glow) */
+        .ambient-glow {
+            position: fixed;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.1) 0%, transparent 70%);
+            filter: blur(80px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: moveGlow 15s infinite alternate;
+        }
+
+        @keyframes moveGlow {
+            from { top: 10%; left: 10%; }
+            to { top: 70%; left: 80%; }
+        }
+
+        /* 2. الهيدر واللوادر */
+        header {
+            padding: 60px 20px 30px;
+            text-align: center;
+        }
+
+        .logo-pulse {
+            font-size: 2.5em;
+            font-weight: 700;
+            letter-spacing: -1px;
+            background: linear-gradient(to bottom, #fff, #888);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: logoPulse 3s infinite ease-in-out;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { opacity: 1; filter: drop-shadow(0 0 5px var(--emerald)); }
+            50% { opacity: 0.6; filter: drop-shadow(0 0 20px var(--emerald)); }
+        }
+
+        /* 3. قائمة التطبيقات (Vertical List) */
+        .app-container {
+            max-width: 450px;
+            margin: 0 auto;
+            padding: 0 15px 100px;
+        }
+
+        .app-card {
+            background: var(--glass);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 0.5px solid var(--border);
+            border-radius: 24px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.4s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card:active {
+            transform: scale(0.96);
+            border-color: var(--emerald);
+        }
+
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 14px; /* iOS Squircle */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .app-meta { flex-grow: 1; }
+        .app-name { font-weight: 700; font-size: 1.1em; display: block; margin-bottom: 4px; }
+        .app-sub { font-size: 0.8em; color: #666; letter-spacing: 0.5px; }
+
+        /* 4. النافذة المنبثقة (The Elite Pop-up) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px);
+            display: none;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            width: 85%;
+            max-width: 380px;
+            background: linear-gradient(145deg, #111, #000);
+            border: 1px solid var(--border);
+            border-radius: 35px;
+            padding: 40px 25px;
+            text-align: center;
+            transform: scale(0.5);
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        /* النبض الضوئي للشهادة */
+        .cert-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #aaa;
+            margin-top: 15px;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--emerald);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--emerald);
+            animation: dotPulse 1.5s infinite;
+        }
+
+        @keyframes dotPulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* زر التحميل (Magic Button) */
+        .magic-btn {
+            background: linear-gradient(180deg, #333 0%, #111 100%);
+            border: 1px solid var(--border);
+            color: #fff;
+            width: 100%;
+            padding: 18px;
+            border-radius: 18px;
+            font-weight: 700;
+            margin-top: 30px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .magic-btn::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: 0.5s;
+        }
+
+        .magic-btn:hover::after { left: 100%; }
+
+        /* شريط التمرير المخفي */
+        ::-webkit-scrollbar { display: none; }
+    </style>
 </head>
 <body>
-  <!-- Loading -->
-  <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-logo">وز+</div>
-    <div class="loading-text">الوزير بلس – يتم التحميل...</div>
-  </div>
 
-  <!-- Particles & glows -->
-  <div class="particle-layer" id="particleLayer"></div>
-  <div class="ambient-glow ambient-gold"></div>
-  <div class="ambient-glow ambient-emerald"></div>
+    <canvas id="dust-canvas"></canvas>
+    <div class="ambient-glow"></div>
 
-  <!-- App shell -->
-  <div class="app-shell" id="appShell" style="opacity:0; pointer-events:none;">
-    <header class="app-header">
-      <div class="brand-block">
-        <div class="brand-mark">وز</div>
-        <div>
-          <div class="brand-text-main">الوزير بلس</div>
-          <div class="brand-text-sub">iPhone Plus Store – Ultra Premium</div>
-        </div>
-      </div>
-      <div class="status-pill">
-        <div class="status-dot"></div>
-        <span>الشهادات مفعّلة</span>
-      </div>
+    <header>
+        <div class="logo-pulse">ALWAZIR PLUS</div>
+        <p>Ultra-Premium Store</p>
     </header>
 
-    <section class="app-title">
-      <div class="app-title-main">متجر تطبيقات iPhone Plus</div>
-      <div class="app-title-sub">تجربة فاخرة، مظلمة، وسريعة – مصممة خصيصاً لعشّاق الـ iOS.</div>
-    </section>
-
-    <main class="app-list-wrapper" id="appList">
-      <!-- Cards injected by JS -->
-    </main>
-  </div>
-
-  <!-- Modal -->
-  <div class="modal-backdrop" id="modalBackdrop">
-    <div class="modal-panel" id="modalPanel">
-      <button class="modal-close" id="modalClose" aria-label="إغلاق">✕</button>
-      <div class="modal-header">
-        <div class="modal-icon" id="modalIcon">A</div>
-        <div class="modal-title-block">
-          <div class="modal-app-name" id="modalName">اسم التطبيق</div>
-          <div class="modal-app-sub" id="modalDev">المطور</div>
+    <div class="app-container" id="appList">
         </div>
-      </div>
 
-      <div class="modal-cert">
-        <div class="modal-cert-dot"></div>
-        <div class="modal-cert-text">الشهادة تعمل – موثوق وآمن</div>
-      </div>
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <img id="mIcon" src="" class="app-icon" style="width: 100px; height: 100px; margin-bottom: 20px;">
+            <h2 id="mName" style="margin: 0; font-size: 1.8em;"></h2>
+            
+            <div class="cert-badge">
+                <div class="pulse-dot"></div>
+                الشهادة تعمل بنجاح ✅
+            </div>
 
-      <div class="modal-body" id="modalDesc">
-        وصف مختصر للتطبيق يوضح الفكرة الأساسية، الأداء العالي، وتجربة الاستخدام الفاخرة على iPhone Plus.
-      </div>
+            <p style="color: #666; font-size: 0.9em; line-height: 1.6; margin-top: 20px;">
+                نسخة حصرية، مدموجة بأحدث أدوات التوقيع السحابية لضمان الاستقرار التام.
+            </p>
 
-      <div class="modal-meta-row">
-        <span><strong>الحجم:</strong> <span id="modalSize">120 MB</span></span>
-        <span><strong>التقييم:</strong> <span id="modalRating">4.9</span> ★</span>
-        <span><strong>الإصدار:</strong> <span id="modalVersion">1.0.0</span></span>
-      </div>
-
-      <button class="download-btn" id="downloadBtn">
-        <span class="download-icon">⬇︎</span>
-        <span>تحميل التطبيق الآن</span>
-      </button>
-
-      <div class="modal-footer-note">
-        يتم التثبيت عبر شهادة موقّعة – يُفضّل إغلاق جميع التطبيقات أثناء التثبيت لسرعة أعلى.
-      </div>
+            <button class="magic-btn" id="installBtn">تثبيت الآن ⚡</button>
+            <div onclick="closeModal()" style="margin-top: 20px; color: #444; cursor: pointer; font-size: 0.9em;">إغلاق النافذة</div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    // Sample data
-    const apps = [
-      {
-        id: 1,
-        name: "Vision Pro Camera",
-        dev: "Elite Labs",
-        size: "148 MB",
-        rating: "4.9",
-        version: "2.3.1",
-        iconAlt: false,
-        tag: "Pro Photo",
-        desc: "تطبيق تصوير احترافي يستغل قدرات كاميرا iPhone Plus بالكامل مع أوضاع ليلية وسينمائية فائقة."
-      },
-      {
-        id: 2,
-        name: "Emerald VPN Ultra",
-        dev: "SecureWave",
-        size: "32 MB",
-        rating: "4.8",
-        version: "5.0.0",
-        iconAlt: true,
-        tag: "Privacy",
-        desc: "شبكة VPN فائقة السرعة مع تشفير متقدّم، مصممة لتجربة تصفح آمنة وسلسة على iOS."
-      },
-      {
-        id: 3,
-        name: "Royal Music Plus",
-        dev: "Golden Sound",
-        size: "96 MB",
-        rating: "4.7",
-        version: "3.4.2",
-        iconAlt: false,
-        tag: "Hi‑Fi Audio",
-        desc: "مشغّل موسيقى بجودة Hi‑Fi مع واجهة مظلمة فاخرة وقوائم تشغيل ذكية مخصّصة لك."
-      },
-      {
-        id: 4,
-        name: "Shadow Games Hub",
-        dev: "Nightfall Studio",
-        size: "210 MB",
-        rating: "4.9",
-        version: "1.8.0",
-        iconAlt: true,
-        tag: "Gaming",
-        desc: "مركز ألعاب متكامل يوفّر مكتبة ألعاب مميزة مع تحسينات أداء خاصة لـ iPhone Plus."
-      }
-    ];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
-    const appList = document.getElementById("appList");
-    const modalBackdrop = document.getElementById("modalBackdrop");
-    const modalPanel = document.getElementById("modalPanel");
-    const modalClose = document.getElementById("modalClose");
-    const modalIcon = document.getElementById("modalIcon");
-    const modalName = document.getElementById("modalName");
-    const modalDev = document.getElementById("modalDev");
-    const modalDesc = document.getElementById("modalDesc");
-    const modalSize = document.getElementById("modalSize");
-    const modalRating = document.getElementById("modalRating");
-    const modalVersion = document.getElementById("modalVersion");
-    const downloadBtn = document.getElementById("downloadBtn");
-    const loadingOverlay = document.getElementById("loadingOverlay");
-    const appShell = document.getElementById("appShell");
-    const particleLayer = document.getElementById("particleLayer");
+        const firebaseConfig = {
+            apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
+            authDomain: "minister-plus.firebaseapp.com",
+            projectId: "minister-plus",
+            storageBucket: "minister-plus.firebasestorage.app",
+            appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-    // Render app cards
-    function renderApps() {
-      appList.innerHTML = "";
-      apps.forEach(app => {
-        const card = document.createElement("div");
-        card.className = "app-card";
-        card.dataset.id = app.id;
+        // جلب البيانات وعرضها
+        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snap) => {
+            const container = document.getElementById('appList');
+            container.innerHTML = '';
+            snap.forEach((doc) => {
+                const app = doc.data();
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.onclick = () => openModal(app);
+                card.innerHTML = `
+                    <img src="${app.img}" class="app-icon">
+                    <div class="app-meta">
+                        <span class="app-name">${app.name}</span>
+                        <span class="app-sub">${app.isReady ? 'STABLE VERSION' : 'SIGNED EDITION'}</span>
+                    </div>
+                    <div style="opacity: 0.3">→</div>
+                `;
+                container.appendChild(card);
+            });
+        });
 
-        const icon = document.createElement("div");
-        icon.className = "app-icon" + (app.iconAlt ? " app-icon-alt" : "");
-        icon.textContent = app.name.charAt(0);
+        // النافذة المنبثقة
+        window.openModal = (app) => {
+            const overlay = document.getElementById('modalOverlay');
+            document.getElementById('mIcon').src = app.img;
+            document.getElementById('mName').innerText = app.name;
+            overlay.style.display = 'flex';
+            setTimeout(() => overlay.classList.add('active'), 10);
 
-        const info = document.createElement("div");
-        info.className = "app-info";
-
-        const name = document.createElement("div");
-        name.className = "app-name";
-        name.textContent = app.name;
-
-        const meta = document.createElement("div");
-        meta.className = "app-meta";
-
-        const badge = document.createElement("span");
-        badge.className = "badge";
-        badge.textContent = app.tag;
-
-        const rating = document.createElement("span");
-        rating.className = "rating";
-        rating.innerHTML = `<span class="rating-star">★</span><span>${app.rating}</span>`;
-
-        const size = document.createElement("span");
-        size.className = "app-size";
-        size.textContent = app.size;
-
-        meta.appendChild(badge);
-        meta.appendChild(rating);
-        meta.appendChild(size);
-
-        info.appendChild(name);
-        info.appendChild(meta);
-
-        const chevron = document.createElement("div");
-        chevron.className = "chevron";
-        chevron.textContent = "›";
-
-        card.appendChild(icon);
-        card.appendChild(info);
-        card.appendChild(chevron);
-
-        // Tap / click interactions
-        const triggerModal = (ev) => {
-          ev.preventDefault();
-          hapticVisual(card);
-          openModal(app);
+            document.getElementById('installBtn').onclick = () => {
+                const plist = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>${app.ipa}</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>${app.bundle}</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>${app.name}</string></dict></dict></array></dict></plist>`;
+                const base64 = btoa(unescape(encodeURIComponent(plist)));
+                window.location.href = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64}`;
+            };
         };
 
-        card.addEventListener("click", triggerModal);
-        card.addEventListener("touchend", triggerModal);
+        window.closeModal = () => {
+            const overlay = document.getElementById('modalOverlay');
+            overlay.classList.remove('active');
+            setTimeout(() => overlay.style.display = 'none', 400);
+        };
 
-        appList.appendChild(card);
-      });
-    }
-
-    // Haptic visual feedback
-    function hapticVisual(card) {
-      card.classList.add("app-card-tap", "app-card-haptic");
-      setTimeout(() => {
-        card.classList.remove("app-card-haptic");
-      }, 140);
-      setTimeout(() => {
-        card.classList.remove("app-card-tap");
-      }, 220);
-    }
-
-    // Modal open
-    function openModal(app) {
-      modalIcon.textContent = app.name.charAt(0);
-      modalName.textContent = app.name;
-      modalDev.textContent = app.dev;
-      modalDesc.textContent = app.desc;
-      modalSize.textContent = app.size;
-      modalRating.textContent = app.rating;
-      modalVersion.textContent = app.version;
-
-      modalBackdrop.classList.add("active");
-      document.body.style.overflow = "hidden";
-    }
-
-    // Modal close
-    function closeModal() {
-      modalBackdrop.classList.remove("active");
-      document.body.style.overflow = "hidden"; // keep SPA feel
-    }
-
-    modalClose.addEventListener("click", closeModal);
-    modalBackdrop.addEventListener("click", (e) => {
-      if (e.target === modalBackdrop) closeModal();
-    });
-
-    // Download button feedback
-    downloadBtn.addEventListener("click", () => {
-      downloadBtn.textContent = "جاري تجهيز التحميل...";
-      setTimeout(() => {
-        downloadBtn.textContent = "تم تجهيز الرابط – اضغط مرة أخرى للتثبيت";
-      }, 900);
-    });
-
-    // Particles
-    function createParticles() {
-      const count = 40;
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      for (let i = 0; i < count; i++) {
-        const p = document.createElement("div");
-        p.className = "particle";
-        const x = Math.random() * w;
-        const y = Math.random() * h;
-        const duration = 18 + Math.random() * 18;
-        const delay = -Math.random() * duration;
-        p.style.left = x + "px";
-        p.style.top = y + "px";
-        p.style.animationDuration = duration + "s";
-        p.style.animationDelay = delay + "s";
-        particleLayer.appendChild(p);
-      }
-    }
-
-    // Fake loading
-    window.addEventListener("load", () => {
-      createParticles();
-      renderApps();
-      setTimeout(() => {
-        loadingOverlay.style.opacity = "0";
-        loadingOverlay.style.pointerEvents = "none";
-        appShell.style.opacity = "1";
-        appShell.style.pointerEvents = "auto";
-      }, 1200);
-    });
-  </script>
+        // 5. تأثير الغبار الكوني (Particle Engine)
+        const canvas = document.getElementById('dust-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        function init() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            particles = [];
+            for(let i=0; i<60; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    vx: Math.random() * 0.2 - 0.1,
+                    vy: Math.random() * 0.2 + 0.1
+                });
+            }
+        }
+        function render() {
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "rgba(255,255,255,0.1)";
+            particles.forEach(p => {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+                p.x += p.vx; p.y += p.vy;
+                if(p.y > canvas.height) p.y = 0;
+            });
+            requestAnimationFrame(render);
+        }
+        init(); render();
+        window.addEventListener('resize', init);
+    </script>
 </body>
 </html>
