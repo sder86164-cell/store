@@ -2,60 +2,80 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>مصنع تطبيقات الوزير 🛠️</title>
+    <title>إدارة الوزير 2026 👑</title>
     <style>
-        body { background: #050505; color: white; font-family: sans-serif; text-align: center; padding: 20px; }
-        .admin-box { background: #111; border: 2px solid red; padding: 25px; border-radius: 20px; max-width: 500px; margin: auto; box-shadow: 0 0 30px rgba(255,0,0,0.5); }
-        input, textarea { width: 90%; padding: 12px; margin: 10px 0; border-radius: 10px; border: 1px solid #333; background: #1a1a1a; color: white; }
-        .btn-publish { background: linear-gradient(90deg, #ff0000, #990000); color: white; padding: 15px 40px; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; font-size: 18px; width: 100%; transition: 0.3s; }
-        .btn-publish:hover { transform: scale(1.05); box-shadow: 0 0 20px red; }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; }
+        .box { background: #0a0a0a; border: 2px solid red; border-radius: 20px; padding: 25px; max-width: 550px; margin: 30px auto; box-shadow: 0 0 30px rgba(255,0,0,0.4); }
+        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #222; background: #111; color: #fff; font-size: 16px; }
+        .btn-send { background: linear-gradient(45deg, #f00, #800); color: white; padding: 15px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 15px; }
+        .item { background: #111; margin: 15px auto; padding: 15px; display: flex; justify-content: space-between; border-radius: 15px; border: 1px solid #333; max-width: 550px; align-items: center; }
+        .del-btn { background: #f00; color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1 style="color:red; text-shadow: 0 0 10px red;">وزير بلس - إدارة النشر 👑</h1>
-    <div class="admin-box">
-        <input type="text" id="name" placeholder="اسم التطبيق (مثال: ببجي الوزير)">
-        <input type="text" id="ipa" placeholder="رابط الـ IPA المباشر من GitHub">
-        <input type="text" id="icon" placeholder="رابط أيقونة التطبيق (صورة)">
-        <input type="text" id="cert" placeholder="رابط الشهادة المستخدمة">
-        <textarea id="desc" rows="3" placeholder="وصف التطبيق (مثال: كود مود، ثبات ايم)"></textarea>
-        <button class="btn-publish" onclick="pushToUsers()">دمج ونشر تلقائي 🔥</button>
+    <h1 style="color:red; text-shadow: 0 0 15px red;">لوحة التحكم الملكية 👑</h1>
+    
+    <div class="box">
+        <h3>إضافة تطبيق جديد 🚀</h3>
+        <input type="text" id="n" placeholder="اسم التطبيق">
+        <input type="text" id="b" placeholder="Bundle ID (مثال: com.minister.pubg)">
+        <input type="text" id="i" placeholder="رابط الـ IPA المباشر">
+        <input type="text" id="img" placeholder="رابط الأيقونة (Image URL)">
+        <input type="text" id="c" placeholder="رابط الشهادة المدموجة">
+        <textarea id="d" rows="4" placeholder="وصف التطبيق + التقييم (مثال: ⭐⭐⭐⭐⭐ ثبات ايم 100%)"></textarea>
+        <button class="btn-send" onclick="sendToStore()">نشر في المتجر الآن 🔥</button>
     </div>
+
+    <div id="list"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
             authDomain: "minister-plus.firebaseapp.com",
             projectId: "minister-plus",
             storageBucket: "minister-plus.firebasestorage.app",
-            messagingSenderId: "438719729037",
             appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.pushToUsers = async () => {
+        window.sendToStore = async () => {
             const data = {
-                name: document.getElementById('name').value,
-                ipa: document.getElementById('ipa').value,
-                icon: document.getElementById('icon').value,
-                cert: document.getElementById('cert').value,
-                desc: document.getElementById('desc').value,
-                time: new Date().getTime()
+                name: document.getElementById('n').value,
+                bundle: document.getElementById('b').value,
+                ipa: document.getElementById('i').value,
+                img: document.getElementById('img').value,
+                cert: document.getElementById('c').value,
+                desc: document.getElementById('d').value,
+                time: Date.now()
             };
-
             if(data.name && data.ipa) {
-                try {
-                    await addDoc(collection(db, "apps"), data);
-                    alert("تم الدمج والرفع بنجاح! سيظهر الآن عند جميع الزبائن 🚀");
-                    location.reload();
-                } catch (e) { alert("تأكد من تفعيل Rules في Firebase"); }
-            } else { alert("عبي البيانات كاملة يا وزير!"); }
-        }
+                await addDoc(collection(db, "apps"), data);
+                alert("تم النشر بنجاح! ✅");
+                location.reload();
+            } else { alert("عبي البيانات يا وزير!"); }
+        };
+
+        onSnapshot(collection(db, "apps"), (s) => {
+            const l = document.getElementById('list'); l.innerHTML = '<h2 style="color:gray;">إدارة التطبيقات المنشورة</h2>';
+            s.forEach((d) => {
+                const appData = d.data();
+                l.innerHTML += `
+                    <div class="item">
+                        <div style="text-align:right;">
+                            <strong>${appData.name}</strong><br>
+                            <small style="color:gray;">${appData.bundle}</small>
+                        </div>
+                        <button class="del-btn" onclick="deleteApp('${d.id}')">حذف نهائي 🗑️</button>
+                    </div>`;
+            });
+        });
+
+        window.deleteApp = async (id) => { if(confirm("هل أنت متأكد من الحذف؟")) await deleteDoc(doc(db, "apps", id)); };
     </script>
 </body>
 </html>
