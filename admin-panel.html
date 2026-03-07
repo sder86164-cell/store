@@ -2,37 +2,52 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>تحكم الوزير - الإصدار الخارق 🚀</title>
+    <title>لوحة تحكم الوزير - النسخة الشاملة 👑</title>
     <style>
-        :root { --main-red: #ff0000; }
+        :root { --main-red: #ff0000; --bg-dark: #050505; }
         body { background: #000; color: #fff; font-family: 'Cairo', sans-serif; text-align: center; padding: 20px; }
-        .admin-box { background: #0a0a0a; border: 2px solid var(--main-red); border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; position: relative; overflow: hidden; }
-        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; }
+        .admin-box { background: var(--bg-dark); border: 2px solid var(--main-red); border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; box-shadow: 0 0 30px rgba(255,0,0,0.4); }
+        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; font-size: 14px; }
+        input:focus { border-color: var(--main-red); outline: none; }
         
-        /* أنيميشن الرفع والعداد */
+        .cert-section { background: #1a0000; padding: 15px; border-radius: 15px; border: 1px dashed var(--main-red); margin: 15px 0; }
+        h4 { margin: 0 0 10px 0; color: #ff9999; }
+
+        /* أنيميشن الرفع */
         #uploadProgress { display: none; margin-top: 20px; }
-        .progress-bar { width: 100%; background: #222; height: 10px; border-radius: 5px; overflow: hidden; }
-        .progress-fill { width: 0%; background: var(--main-red); height: 100%; transition: 0.1s; }
+        .progress-bar { width: 100%; background: #222; height: 12px; border-radius: 10px; overflow: hidden; }
+        .progress-fill { width: 0%; background: linear-gradient(90deg, #f00, #900); height: 100%; transition: 0.1s; }
         
-        .btn-post { background: linear-gradient(45deg, #f00, #600); color: white; padding: 18px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 20px; margin-top: 20px; display: block; }
-        .btn-post:active { transform: scale(0.98); }
+        .btn-post { background: linear-gradient(45deg, #f00, #600); color: white; padding: 18px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 20px; margin-top: 10px; box-shadow: 0 5px 15px rgba(255,0,0,0.3); }
+        .btn-post:active { transform: scale(0.96); }
     </style>
 </head>
 <body>
-    <h1 style="color:red; text-shadow: 0 0 20px red;">نظام الرفع الصاروخي 🚀</h1>
+    <h1 style="color:red; text-shadow: 0 0 20px red;">مركز إدارة الشهادات والتطبيقات 🚀</h1>
+    
     <div class="admin-box">
-        <input type="text" id="appName" placeholder="اسم التطبيق">
-        <input type="text" id="appBundle" placeholder="البندل آيدي (مهم جداً للتثبيت)">
+        <h3>إضافة تطبيق جديد 🛠️</h3>
+        
+        <input type="text" id="appName" placeholder="اسم التطبيق (مثال: GBox v6)">
+        <input type="text" id="appBundle" placeholder="البندل آيدي (مهم جداً: com.gbox.ios)">
         <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر">
         <input type="text" id="appImg" placeholder="رابط الأيقونة المباشر">
-        <textarea id="appDesc" placeholder="الوصف..."></textarea>
+        
+        <div class="cert-section">
+            <h4>بيانات توثيق الشهادة 🛡️</h4>
+            <input type="text" id="certP12" placeholder="رابط ملف الـ P12 المباشر">
+            <input type="text" id="certMobile" placeholder="رابط ملف الـ Mobileprovision المباشر">
+            <input type="text" id="certPass" placeholder="رمز الشهادة (Password)" value="1">
+        </div>
+
+        <textarea id="appDesc" rows="3" placeholder="وصف التطبيق..."></textarea>
         
         <div id="uploadProgress">
-            <p id="statusText">جاري المعالجة والرفع... <span id="percent">0%</span></p>
+            <p id="statusText">جاري حقن الشهادة والرفع... <span id="percent">0%</span></p>
             <div class="progress-bar"><div id="fill" class="progress-fill"></div></div>
         </div>
 
-        <button class="btn-post" onclick="startRocketUpload()">نشر التطبيق بسرعة الصاروخ 🚀</button>
+        <button class="btn-post" onclick="startRocketUpload()">نشر التطبيق بالشهادة 🔥</button>
     </div>
 
     <script type="module">
@@ -50,9 +65,19 @@
         const db = getFirestore(app);
 
         window.startRocketUpload = async () => {
-            const name = document.getElementById('appName').value;
-            const ipa = document.getElementById('appIpa').value;
-            if(!name || !ipa) return alert("عب البيانات يا وزير!");
+            const data = {
+                name: document.getElementById('appName').value,
+                bundle: document.getElementById('appBundle').value,
+                ipa: document.getElementById('appIpa').value,
+                img: document.getElementById('appImg').value,
+                p12: document.getElementById('certP12').value,
+                provision: document.getElementById('certMobile').value,
+                pass: document.getElementById('certPass').value,
+                desc: document.getElementById('appDesc').value,
+                time: Date.now()
+            };
+
+            if(!data.name || !data.ipa) return alert("عب البيانات يا وزير!");
 
             document.getElementById('uploadProgress').style.display = 'block';
             let p = 0;
@@ -61,12 +86,8 @@
                 if(p >= 100) {
                     p = 100;
                     clearInterval(interval);
-                    await addDoc(collection(db, "apps"), {
-                        name, bundle: document.getElementById('appBundle').value,
-                        ipa, img: document.getElementById('appImg').value,
-                        desc: document.getElementById('appDesc').value, time: Date.now()
-                    });
-                    alert("تم النشر الصاروخي! ✅");
+                    await addDoc(collection(db, "apps"), data);
+                    alert("تم النشر بنجاح! التطبيق والشهادة الآن في وضع الاستعداد ✅");
                     location.reload();
                 }
                 document.getElementById('percent').innerText = p + "%";
