@@ -1,174 +1,526 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>لوحة تحكم الوزير - الإدارة الشاملة 👑</title>
-    <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
-        .admin-box { background: #0a0a0a; border: 2px solid #00ff00; border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
-        input, textarea, select { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; text-align: center; }
-        .cert-section { background: #001a00; padding: 15px; border-radius: 15px; border: 1px dashed #00ff00; margin: 15px 0; transition: 0.3s; }
-        .btn-post { background: linear-gradient(45deg, #00ff00, #006600); color: white; padding: 18px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 20px; margin-top: 10px; transition: 0.3s; }
-        #progBar { display: none; width: 100%; background: #222; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 15px; }
-        #fill { width: 0%; background: #00ff00; height: 100%; transition: 0.1s; }
+  <meta charset="UTF-8" />
+  <title>Plus Store – Admin Panel</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        .list-container { max-width: 650px; margin: 40px auto; text-align: right; }
-        .app-item { background: #111; border: 1px solid #222; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
-        .controls { display: flex; gap: 8px; }
-        .btn-delete { background: #ff0000; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
-        .btn-edit { background: #ffa500; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
-        
-        /* تنسيق خيار التبديل */
-        .toggle-ready { background: #002b00; padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: 1px solid #00ff00; }
-        .toggle-ready input { width: auto; margin: 0; cursor: pointer; }
-    </style>
+  <!-- Tajawal / SF Pro -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet" />
+
+  <!-- Firebase (نفس النسخة التي تستخدمها في المشروع) -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-main: #02030a;
+      --panel-bg: rgba(5, 8, 18, 0.96);
+      --panel-border: rgba(0, 255, 157, 0.25);
+      --accent: #00ff9d;
+      --accent-soft: rgba(0, 255, 157, 0.18);
+      --accent-strong: #00e676;
+      --danger: #ff4b6a;
+      --text-main: #f5f7ff;
+      --text-muted: #8b90a5;
+      --radius-lg: 18px;
+      --radius-pill: 999px;
+      --shadow-strong: 0 22px 60px rgba(0, 0, 0, 0.9);
+    }
+
+    body {
+      font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
+      background: radial-gradient(circle at top, #07121f 0, #02030a 45%, #000000 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px 40px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .layout {
+      width: 100%;
+      max-width: 1120px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
+      gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+      .layout {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    .panel {
+      background: radial-gradient(circle at top left, rgba(0, 255, 157, 0.12), transparent 55%),
+                  linear-gradient(145deg, rgba(5, 8, 18, 0.98), rgba(2, 3, 10, 0.98));
+      border-radius: 22px;
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow-strong);
+      padding: 18px 18px 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background: radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.18), transparent 55%);
+      opacity: 0.35;
+      mix-blend-mode: screen;
+      pointer-events: none;
+    }
+
+    .panel-header {
+      position: relative;
+      z-index: 1;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title span.dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 16px rgba(0, 255, 157, 0.9);
+      animation: pulse 1.4s infinite ease-out;
+    }
+
+    @keyframes pulse {
+      0% {
+        transform: scale(0.9);
+        opacity: 0.9;
+      }
+      70% {
+        transform: scale(1.4);
+        opacity: 0.1;
+      }
+      100% {
+        transform: scale(0.9);
+        opacity: 0.9;
+      }
+    }
+
+    .panel-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* الفورم */
+    form {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+
+    input[type="text"],
+    input[type="url"],
+    textarea {
+      background: rgba(0, 0, 0, 0.6);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 8px 10px;
+      color: var(--text-main);
+      font-size: 0.86rem;
+      outline: none;
+      transition: border-color 0.16s ease-out, box-shadow 0.16s ease-out, background 0.16s ease-out;
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 70px;
+      max-height: 140px;
+    }
+
+    input[type="text"]:focus,
+    input[type="url"]:focus,
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 18px rgba(0, 255, 157, 0.35);
+      background: rgba(0, 0, 0, 0.8);
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .row > .field-group {
+      flex: 1;
+    }
+
+    @media (max-width: 600px) {
+      .row {
+        flex-direction: column;
+      }
+    }
+
+    .toggle-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 4px;
+      margin-bottom: 4px;
+    }
+
+    .toggle-label {
+      font-size: 0.86rem;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toggle-label span.hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .switch {
+      position: relative;
+      width: 44px;
+      height: 22px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      inset: 0;
+      background-color: rgba(255, 255, 255, 0.12);
+      border-radius: 999px;
+      transition: 0.2s;
+    }
+
+    .slider:before {
+      content: "";
+      position: absolute;
+      height: 18px;
+      width: 18px;
+      inset-block-start: 2px;
+      inset-inline-start: 3px;
+      background-color: #02030a;
+      border-radius: 50%;
+      transition: 0.2s;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
+    }
+
+    .switch input:checked + .slider {
+      background-color: var(--accent-soft);
+      box-shadow: 0 0 18px rgba(0, 255, 157, 0.45);
+    }
+
+    .switch input:checked + .slider:before {
+      transform: translateX(20px);
+      background-color: var(--accent);
+    }
+
+    .cert-section {
+      margin-top: 4px;
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px dashed rgba(0, 255, 157, 0.35);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .cert-section.hidden {
+      display: none;
+    }
+
+    .cert-title {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    /* شريط التقدم */
+    .progress-wrapper {
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
+
+    .progress-bar-bg {
+      width: 100%;
+      height: 7px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      position: absolute;
+      inset-block: 0;
+      inset-inline-start: 0;
+      width: 0%;
+      background: linear-gradient(90deg, #00ff9d, #00b3ff);
+      box-shadow: 0 0 18px rgba(0, 255, 157, 0.65);
+      transition: width 0.18s ease-out;
+    }
+
+    .progress-label {
+      margin-top: 4px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .progress-label span.status {
+      color: var(--accent);
+    }
+
+    .btn-primary {
+      margin-top: 8px;
+      padding: 9px 18px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background-image:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(180, 180, 180, 0.05)),
+        linear-gradient(120deg, #00ff9d, #00b3ff);
+      background-origin: border-box;
+      color: #02030a;
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85), 0 0 26px rgba(0, 255, 157, 0.45);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.6;
+      cursor: default;
+      box-shadow: none;
+    }
+
+    .btn-primary span.icon {
+      font-size: 1.1rem;
+    }
+
+    .form-message {
+      margin-top: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .form-message.error {
+      color: var(--danger);
+    }
+
+    .form-message.success {
+      color: var(--accent);
+    }
+
+    /* قائمة التطبيقات */
+    .apps-list {
+      position: relative;
+      z-index: 1;
+      margin-top: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 460px;
+      overflow-y: auto;
+      padding-inline-end: 4px;
+    }
+
+    .apps-list::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .apps-list::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 157, 0.35);
+      border-radius: 999px;
+    }
+
+    .app-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 14px;
+      background: rgba(0, 0, 0, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .app-row-main {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .app-row-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .app-row-bundle {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .app-row-tag {
+      font-size: 0.75rem;
+      color: var(--accent);
+      margin-top: 2px;
+    }
+
+    .app-row-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-small {
+      padding: 5px 9px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(0, 0, 0, 0.8);
+      color: var(--text-main);
+      font-size: 0.78rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-small.danger {
+      border-color: rgba(255, 75, 106, 0.6);
+      color: var(--danger);
+    }
+
+    .badge-cert {
+      padding: 3px 8px;
+      border-radius: var(--radius-pill);
+      font-size: 0.72rem;
+      color: var(--accent);
+      background: rgba(0, 255, 157, 0.12);
+      border: 1px solid rgba(0, 255, 157, 0.35);
+    }
+
+    .empty-state {
+      margin-top: 16px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+  </style>
 </head>
 <body>
-    <h1 style="color:#00ff00; text-shadow: 0 0 20px #00ff00;">🛡️ نظام الإدارة والتحكم الملكي</h1>
-    
-    <div class="admin-box" id="formBox">
-        <h3 id="formTitle">نشر تطبيق جديد 🚀</h3>
-        <input type="hidden" id="editId">
-        
-        <label class="toggle-ready">
-            <input type="checkbox" id="isReady" onchange="toggleCertSection()">
-            <span>تطبيق مدموج وجاهز (توقيع خارجي) ✅</span>
-        </label>
 
-        <input type="text" id="appName" placeholder="اسم التطبيق">
-        <input type="text" id="appBundle" placeholder="البندل آيدي (com.gbox.ios)">
-        <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر (Raw)">
-        <input type="text" id="appImg" placeholder="رابط الأيقونة المباشر">
-        
-        <div class="cert-section" id="certSection">
-            <h4 style="margin:0; color: #99ff99;">بيانات الشهادة 🔑</h4>
-            <input type="text" id="certP12" placeholder="رابط ملف الـ P12">
-            <input type="text" id="certMobile" placeholder="رابط ملف الـ Mobileprovision">
-            <input type="text" id="certPass" placeholder="رمز الشهادة" value="1">
+<div class="layout">
+  <!-- لوحة إضافة التطبيقات -->
+  <section class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">
+          <span class="dot"></span>
+          PLUS ADMIN
         </div>
-
-        <div id="progBar"><div id="fill"></div></div>
-        <p id="status" style="display:none;">جاري معالجة البيانات... <span id="percent">0%</span></p>
-
-        <button class="btn-post" id="mainBtn" onclick="saveApp()">نشر وتوقيع التطبيق 🔥</button>
-        <button class="btn-post" id="cancelBtn" onclick="resetForm()" style="display:none; background: #333; margin-top: 5px;">إلغاء التعديل</button>
+        <div class="panel-subtitle">إضافة تطبيقات جديدة إلى متجر Plus (Firestore)</div>
+      </div>
     </div>
 
-    <div class="list-container">
-        <h2 style="color: #00ff00; border-bottom: 1px solid #222; padding-bottom: 10px;">إدارة التطبيقات المنشورة 📦</h2>
-        <div id="appList">جاري التحميل...</div>
-    </div>
+    <form id="app-form">
+      <div class="field-group">
+        <label for="name">اسم التطبيق</label>
+        <input id="name" type="text" placeholder="مثال: WhatsApp Plus" required />
+      </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+      <div class="row">
+        <div class="field-group">
+          <label for="bundleId">Bundle Identifier</label>
+          <input id="bundleId" type="text" placeholder="com.example.app" required />
+        </div>
+        <div class="field-group">
+          <label for="tag">وسم / نوع التطبيق (اختياري)</label>
+          <input id="tag" type="text" placeholder="Social · Tweaked" />
+        </div>
+      </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
-            authDomain: "minister-plus.firebaseapp.com",
-            projectId: "minister-plus",
-            storageBucket: "minister-plus.firebasestorage.app",
-            appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+      <div class="field-group">
+        <label for="manifestUrl">رابط ملف الـ Manifest (itms-services)</label>
+        <input id="manifestUrl" type="url" placeholder="https://example.com/app.plist" required />
+      </div>
 
-        // إخفاء/إظهار قسم الشهادة
-        window.toggleCertSection = () => {
-            const isReady = document.getElementById('isReady').checked;
-            document.getElementById('certSection').style.display = isReady ? 'none' : 'block';
-            document.getElementById('mainBtn').innerText = isReady ? 'نشر التطبيق الجاهز 🚀' : 'نشر وتوقيع التطبيق 🔥';
-        };
+      <div class="row">
+        <div class="field-group">
+          <label for="iconUrl">رابط أيقونة التطبيق (iOS Squircle)</label>
+          <input id="iconUrl" type="url" placeholder="https://example.com/icon.png" />
+        </div>
+        <div class="field-group">
+          <label for="ipaUrl">رابط ملف IPA (اختياري)</label>
+          <input id="ipaUrl" type="url" placeholder="https://example.com/app.ipa" />
+        </div>
+      </div>
 
-        // حفظ أو تحديث التطبيق
-        window.saveApp = async () => {
-            const id = document.getElementById('editId').value;
-            const isReady = document.getElementById('isReady').checked;
-            
-            const data = {
-                name: document.getElementById('appName').value,
-                bundle: document.getElementById('appBundle').value,
-                ipa: document.getElementById('appIpa').value,
-                img: document.getElementById('appImg').value,
-                isReady: isReady,
-                p12: isReady ? "" : document.getElementById('certP12').value,
-                provision: isReady ? "" : document.getElementById('certMobile').value,
-                pass: isReady ? "" : document.getElementById('certPass').value,
-                time: Date.now()
-            };
+      <div class="field-group">
+        <label for="description">وصف التطبيق</label>
+        <textarea id="description" placeholder="اكتب وصفاً مختصراً للتطبيق والمميزات الرئيسية."></textarea>
+      </div>
 
-            if(!data.name || !data.ipa) return alert("عب البيانات كاملة!");
+      <div class="toggle-line">
+        <div class="toggle-label">
+          <span>تطبيق مدموج جاهز</span>
+          <span class="hint">إخفاء حقول الشهادة إذا كان التطبيق موقّعاً مسبقاً</span>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="readyMerged" checked />
+          <span class="slider"></span>
+        </label>
+      </div>
 
-            document.getElementById('progBar').style.display = 'block';
-            document.getElementById('status').style.display = 'block';
-            
-            let p = 0;
-            const timer = setInterval(async () => {
-                p += 10;
-                document.getElementById('percent').innerText = p + "%";
-                document.getElementById('fill').style.width = p + "%";
-
-                if(p >= 100) {
-                    clearInterval(timer);
-                    if(id) {
-                        await updateDoc(doc(db, "apps", id), data);
-                        alert("تم التعديل بنجاح! ✅");
-                    } else {
-                        await addDoc(collection(db, "apps"), data);
-                        alert("تم النشر بنجاح! ✅");
-                    }
-                    location.reload();
-                }
-            }, 50);
-        };
-
-        // عرض القائمة
-        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snapshot) => {
-            const listDiv = document.getElementById('appList');
-            listDiv.innerHTML = '';
-            snapshot.forEach((d) => {
-                const appData = d.data();
-                const item = document.createElement('div');
-                item.className = 'app-item';
-                item.innerHTML = `
-                    <div>
-                        <strong>${appData.name}</strong>
-                        ${appData.isReady ? '<small style="color:#00ccff; display:block;">(مدموج جاهز ✅)</small>' : ''}
-                    </div>
-                    <div class="controls">
-                        <button class="btn-edit" onclick='editApp("${d.id}", ${JSON.stringify(appData)})'>تعديل ✏️</button>
-                        <button class="btn-delete" onclick="deleteApp('${d.id}')">حذف 🗑️</button>
-                    </div>`;
-                listDiv.appendChild(item);
-            });
-        });
-
-        // تعبئة البيانات للتعديل
-        window.editApp = (id, data) => {
-            document.getElementById('editId').value = id;
-            document.getElementById('appName').value = data.name;
-            document.getElementById('appBundle').value = data.bundle;
-            document.getElementById('appIpa').value = data.ipa;
-            document.getElementById('appImg').value = data.img;
-            
-            // ضبط خيار المدموج
-            document.getElementById('isReady').checked = data.isReady || false;
-            toggleCertSection();
-
-            if(!data.isReady) {
-                document.getElementById('certP12').value = data.p12 || "";
-                document.getElementById('certMobile').value = data.provision || "";
-                document.getElementById('certPass').value = data.pass || "1";
-            }
-            
-            document.getElementById('formTitle').innerText = "تعديل تطبيق موجود ✏️";
-            document.getElementById('mainBtn').innerText = data.isReady ? "حفظ التغييرات 🚀" : "حفظ التغييرات ✅";
-            document.getElementById('cancelBtn').style.display = "block";
-            window.scrollTo(0,0);
-        };
-
-        window.resetForm = () => { location.reload(); };
-        window.deleteApp = async (id) => { if(confirm("حذف نهائي؟")) await deleteDoc(doc(db, "apps", id)); };
-    </script>
-</body>
-</html>
+      <div id="cert-section" class="cert-section hidden">
+        <div class="cert-title">بيانات الشهادة (للتوقيع من طرفك)</div>
+        <div class="field-group">
+          <label for="p12Url">رابط ملف P12</label>
+          <input id="p12Url" type="url" placeholder="https://example.com/cert.p12" />
+        </div>
+        <div class="field-group">
