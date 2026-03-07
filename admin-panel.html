@@ -2,57 +2,56 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>لوحة تحكم الوزير - النسخة الشاملة 👑</title>
+    <title>لوحة تحكم الوزير - الإدارة الشاملة 👑</title>
     <style>
-        :root { --main-red: #ff0000; --bg-dark: #050505; }
-        body { background: #000; color: #fff; font-family: 'Cairo', sans-serif; text-align: center; padding: 20px; }
-        .admin-box { background: var(--bg-dark); border: 2px solid var(--main-red); border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; box-shadow: 0 0 30px rgba(255,0,0,0.4); }
-        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; font-size: 14px; }
-        input:focus { border-color: var(--main-red); outline: none; }
-        
-        .cert-section { background: #1a0000; padding: 15px; border-radius: 15px; border: 1px dashed var(--main-red); margin: 15px 0; }
-        h4 { margin: 0 0 10px 0; color: #ff9999; }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
+        .admin-box { background: #0a0a0a; border: 2px solid #00ff00; border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
+        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; text-align: center; }
+        .cert-section { background: #001a00; padding: 15px; border-radius: 15px; border: 1px dashed #00ff00; margin: 15px 0; }
+        .btn-post { background: linear-gradient(45deg, #00ff00, #006600); color: white; padding: 18px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 20px; margin-top: 10px; transition: 0.3s; }
+        #progBar { display: none; width: 100%; background: #222; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 15px; }
+        #fill { width: 0%; background: #00ff00; height: 100%; transition: 0.1s; }
 
-        /* أنيميشن الرفع */
-        #uploadProgress { display: none; margin-top: 20px; }
-        .progress-bar { width: 100%; background: #222; height: 12px; border-radius: 10px; overflow: hidden; }
-        .progress-fill { width: 0%; background: linear-gradient(90deg, #f00, #900); height: 100%; transition: 0.1s; }
-        
-        .btn-post { background: linear-gradient(45deg, #f00, #600); color: white; padding: 18px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 20px; margin-top: 10px; box-shadow: 0 5px 15px rgba(255,0,0,0.3); }
-        .btn-post:active { transform: scale(0.96); }
+        .list-container { max-width: 650px; margin: 40px auto; text-align: right; }
+        .app-item { background: #111; border: 1px solid #222; padding: 15px; border-radius: 15px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .controls { display: flex; gap: 8px; }
+        .btn-delete { background: #ff0000; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        .btn-edit { background: #ffa500; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1 style="color:red; text-shadow: 0 0 20px red;">مركز إدارة الشهادات والتطبيقات 🚀</h1>
+    <h1 style="color:#00ff00; text-shadow: 0 0 20px #00ff00;">🛡️ نظام الإدارة والتحكم الملكي</h1>
     
-    <div class="admin-box">
-        <h3>إضافة تطبيق جديد 🛠️</h3>
-        
-        <input type="text" id="appName" placeholder="اسم التطبيق (مثال: GBox v6)">
-        <input type="text" id="appBundle" placeholder="البندل آيدي (مهم جداً: com.gbox.ios)">
-        <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر">
+    <div class="admin-box" id="formBox">
+        <h3 id="formTitle">نشر تطبيق جديد 🚀</h3>
+        <input type="hidden" id="editId">
+        <input type="text" id="appName" placeholder="اسم التطبيق">
+        <input type="text" id="appBundle" placeholder="البندل آيدي (com.gbox.ios)">
+        <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر (Raw)">
         <input type="text" id="appImg" placeholder="رابط الأيقونة المباشر">
         
         <div class="cert-section">
-            <h4>بيانات توثيق الشهادة 🛡️</h4>
-            <input type="text" id="certP12" placeholder="رابط ملف الـ P12 المباشر">
-            <input type="text" id="certMobile" placeholder="رابط ملف الـ Mobileprovision المباشر">
-            <input type="text" id="certPass" placeholder="رمز الشهادة (Password)" value="1">
+            <h4 style="margin:0; color: #99ff99;">بيانات الشهادة 🔑</h4>
+            <input type="text" id="certP12" placeholder="رابط ملف الـ P12">
+            <input type="text" id="certMobile" placeholder="رابط ملف الـ Mobileprovision">
+            <input type="text" id="certPass" placeholder="رمز الشهادة" value="1">
         </div>
 
-        <textarea id="appDesc" rows="3" placeholder="وصف التطبيق..."></textarea>
-        
-        <div id="uploadProgress">
-            <p id="statusText">جاري حقن الشهادة والرفع... <span id="percent">0%</span></p>
-            <div class="progress-bar"><div id="fill" class="progress-fill"></div></div>
-        </div>
+        <div id="progBar"><div id="fill"></div></div>
+        <p id="status" style="display:none;">جاري معالجة البيانات... <span id="percent">0%</span></p>
 
-        <button class="btn-post" onclick="startRocketUpload()">نشر التطبيق بالشهادة 🔥</button>
+        <button class="btn-post" id="mainBtn" onclick="saveApp()">نشر وتوقيع التطبيق 🔥</button>
+        <button class="btn-post" id="cancelBtn" onclick="resetForm()" style="display:none; background: #333; margin-top: 5px;">إلغاء التعديل</button>
+    </div>
+
+    <div class="list-container">
+        <h2 style="color: #00ff00; border-bottom: 1px solid #222; padding-bottom: 10px;">إدارة التطبيقات المنشورة 📦</h2>
+        <div id="appList">جاري التحميل...</div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, updateDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
@@ -64,7 +63,9 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.startRocketUpload = async () => {
+        // حفظ أو تحديث التطبيق
+        window.saveApp = async () => {
+            const id = document.getElementById('editId').value;
             const data = {
                 name: document.getElementById('appName').value,
                 bundle: document.getElementById('appBundle').value,
@@ -73,27 +74,71 @@
                 p12: document.getElementById('certP12').value,
                 provision: document.getElementById('certMobile').value,
                 pass: document.getElementById('certPass').value,
-                desc: document.getElementById('appDesc').value,
                 time: Date.now()
             };
 
-            if(!data.name || !data.ipa) return alert("عب البيانات يا وزير!");
+            if(!data.name || !data.ipa) return alert("عب البيانات كاملة!");
 
-            document.getElementById('uploadProgress').style.display = 'block';
+            document.getElementById('progBar').style.display = 'block';
+            document.getElementById('status').style.display = 'block';
+            
             let p = 0;
-            const interval = setInterval(async () => {
-                p += Math.floor(Math.random() * 10) + 5;
-                if(p >= 100) {
-                    p = 100;
-                    clearInterval(interval);
-                    await addDoc(collection(db, "apps"), data);
-                    alert("تم النشر بنجاح! التطبيق والشهادة الآن في وضع الاستعداد ✅");
-                    location.reload();
-                }
+            const timer = setInterval(async () => {
+                p += 10;
                 document.getElementById('percent').innerText = p + "%";
                 document.getElementById('fill').style.width = p + "%";
-            }, 100);
+
+                if(p >= 100) {
+                    clearInterval(timer);
+                    if(id) {
+                        await updateDoc(doc(db, "apps", id), data);
+                        alert("تم التعديل بنجاح! ✅");
+                    } else {
+                        await addDoc(collection(db, "apps"), data);
+                        alert("تم النشر بنجاح! ✅");
+                    }
+                    location.reload();
+                }
+            }, 50);
         };
+
+        // عرض القائمة
+        onSnapshot(query(collection(db, "apps"), orderBy("time", "desc")), (snapshot) => {
+            const listDiv = document.getElementById('appList');
+            listDiv.innerHTML = '';
+            snapshot.forEach((d) => {
+                const appData = d.data();
+                const item = document.createElement('div');
+                item.className = 'app-item';
+                item.innerHTML = `
+                    <div><strong>${appData.name}</strong></div>
+                    <div class="controls">
+                        <button class="btn-edit" onclick='editApp("${d.id}", ${JSON.stringify(appData)})'>تعديل ✏️</button>
+                        <button class="btn-delete" onclick="deleteApp('${d.id}')">حذف 🗑️</button>
+                    </div>`;
+                listDiv.appendChild(item);
+            });
+        });
+
+        // تعبئة البيانات للتعديل
+        window.editApp = (id, data) => {
+            document.getElementById('editId').value = id;
+            document.getElementById('appName').value = data.name;
+            document.getElementById('appBundle').value = data.bundle;
+            document.getElementById('appIpa').value = data.ipa;
+            document.getElementById('appImg').value = data.img;
+            document.getElementById('certP12').value = data.p12;
+            document.getElementById('certMobile').value = data.provision;
+            document.getElementById('certPass').value = data.pass;
+            
+            document.getElementById('formTitle').innerText = "تعديل تطبيق موجود ✏️";
+            document.getElementById('mainBtn').innerText = "حفظ التغييرات ✅";
+            document.getElementById('cancelBtn').style.display = "block";
+            window.scrollTo(0,0);
+        };
+
+        window.resetForm = () => { location.reload(); };
+        window.deleteApp = async (id) => { if(confirm("حذف نهائي؟")) await deleteDoc(doc(db, "apps", id)); };
     </script>
 </body>
 </html>
