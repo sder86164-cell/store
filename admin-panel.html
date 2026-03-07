@@ -6,8 +6,8 @@
     <style>
         body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
         .admin-box { background: #0a0a0a; border: 2px solid #00ff00; border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; box-shadow: 0 0 30px rgba(0,255,0,0.3); }
-        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; text-align: center; }
-        .cert-section { background: #001a00; padding: 15px; border-radius: 15px; border: 1px dashed #00ff00; margin: 15px 0; }
+        input, textarea, select { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; text-align: center; }
+        .cert-section { background: #001a00; padding: 15px; border-radius: 15px; border: 1px dashed #00ff00; margin: 15px 0; transition: 0.3s; }
         .btn-post { background: linear-gradient(45deg, #00ff00, #006600); color: white; padding: 18px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 20px; margin-top: 10px; transition: 0.3s; }
         #progBar { display: none; width: 100%; background: #222; height: 12px; border-radius: 10px; overflow: hidden; margin-top: 15px; }
         #fill { width: 0%; background: #00ff00; height: 100%; transition: 0.1s; }
@@ -17,6 +17,10 @@
         .controls { display: flex; gap: 8px; }
         .btn-delete { background: #ff0000; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
         .btn-edit { background: #ffa500; color: #fff; border: none; padding: 8px 12px; border-radius: 8px; cursor: pointer; }
+        
+        /* تنسيق خيار التبديل */
+        .toggle-ready { background: #002b00; padding: 10px; border-radius: 12px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; border: 1px solid #00ff00; }
+        .toggle-ready input { width: auto; margin: 0; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -25,12 +29,18 @@
     <div class="admin-box" id="formBox">
         <h3 id="formTitle">نشر تطبيق جديد 🚀</h3>
         <input type="hidden" id="editId">
+        
+        <label class="toggle-ready">
+            <input type="checkbox" id="isReady" onchange="toggleCertSection()">
+            <span>تطبيق مدموج وجاهز (توقيع خارجي) ✅</span>
+        </label>
+
         <input type="text" id="appName" placeholder="اسم التطبيق">
         <input type="text" id="appBundle" placeholder="البندل آيدي (com.gbox.ios)">
         <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر (Raw)">
         <input type="text" id="appImg" placeholder="رابط الأيقونة المباشر">
         
-        <div class="cert-section">
+        <div class="cert-section" id="certSection">
             <h4 style="margin:0; color: #99ff99;">بيانات الشهادة 🔑</h4>
             <input type="text" id="certP12" placeholder="رابط ملف الـ P12">
             <input type="text" id="certMobile" placeholder="رابط ملف الـ Mobileprovision">
@@ -63,17 +73,27 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // إخفاء/إظهار قسم الشهادة
+        window.toggleCertSection = () => {
+            const isReady = document.getElementById('isReady').checked;
+            document.getElementById('certSection').style.display = isReady ? 'none' : 'block';
+            document.getElementById('mainBtn').innerText = isReady ? 'نشر التطبيق الجاهز 🚀' : 'نشر وتوقيع التطبيق 🔥';
+        };
+
         // حفظ أو تحديث التطبيق
         window.saveApp = async () => {
             const id = document.getElementById('editId').value;
+            const isReady = document.getElementById('isReady').checked;
+            
             const data = {
                 name: document.getElementById('appName').value,
                 bundle: document.getElementById('appBundle').value,
                 ipa: document.getElementById('appIpa').value,
                 img: document.getElementById('appImg').value,
-                p12: document.getElementById('certP12').value,
-                provision: document.getElementById('certMobile').value,
-                pass: document.getElementById('certPass').value,
+                isReady: isReady,
+                p12: isReady ? "" : document.getElementById('certP12').value,
+                provision: isReady ? "" : document.getElementById('certMobile').value,
+                pass: isReady ? "" : document.getElementById('certPass').value,
                 time: Date.now()
             };
 
@@ -111,7 +131,10 @@
                 const item = document.createElement('div');
                 item.className = 'app-item';
                 item.innerHTML = `
-                    <div><strong>${appData.name}</strong></div>
+                    <div>
+                        <strong>${appData.name}</strong>
+                        ${appData.isReady ? '<small style="color:#00ccff; display:block;">(مدموج جاهز ✅)</small>' : ''}
+                    </div>
                     <div class="controls">
                         <button class="btn-edit" onclick='editApp("${d.id}", ${JSON.stringify(appData)})'>تعديل ✏️</button>
                         <button class="btn-delete" onclick="deleteApp('${d.id}')">حذف 🗑️</button>
@@ -127,12 +150,19 @@
             document.getElementById('appBundle').value = data.bundle;
             document.getElementById('appIpa').value = data.ipa;
             document.getElementById('appImg').value = data.img;
-            document.getElementById('certP12').value = data.p12;
-            document.getElementById('certMobile').value = data.provision;
-            document.getElementById('certPass').value = data.pass;
+            
+            // ضبط خيار المدموج
+            document.getElementById('isReady').checked = data.isReady || false;
+            toggleCertSection();
+
+            if(!data.isReady) {
+                document.getElementById('certP12').value = data.p12 || "";
+                document.getElementById('certMobile').value = data.provision || "";
+                document.getElementById('certPass').value = data.pass || "1";
+            }
             
             document.getElementById('formTitle').innerText = "تعديل تطبيق موجود ✏️";
-            document.getElementById('mainBtn').innerText = "حفظ التغييرات ✅";
+            document.getElementById('mainBtn').innerText = data.isReady ? "حفظ التغييرات 🚀" : "حفظ التغييرات ✅";
             document.getElementById('cancelBtn').style.display = "block";
             window.scrollTo(0,0);
         };
