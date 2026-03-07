@@ -1,526 +1,210 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Plus Store – Admin Panel</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <title>الوزير بلس | نظام الإدارة الملكي 👑</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
 
-  <!-- Tajawal / SF Pro -->
-  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --accent: #00ff9d;
+            --bg: #05080a;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(0, 255, 157, 0.2);
+        }
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .admin-container {
+            width: 100%;
+            max-width: 600px;
+            background: linear-gradient(145deg, #0a0f12, #020305);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+        }
+        .header { text-align: center; margin-bottom: 30px; }
+        .header h1 { color: var(--accent); font-size: 1.8rem; text-shadow: 0 0 15px var(--accent); }
+        
+        input, textarea {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+            border-radius: 15px;
+            color: white;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
 
-  <!-- Firebase (نفس النسخة التي تستخدمها في المشروع) -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+        /* خيار التبديل (الدمج) */
+        .switch-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .switch { position: relative; width: 50px; height: 25px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background: #333; border-radius: 34px; transition: 0.4s; }
+        .slider:before { content: ""; position: absolute; height: 19px; width: 19px; left: 3px; bottom: 3px; background: white; transition: 0.4s; border-radius: 50%; }
+        input:checked + .slider { background: var(--accent); }
+        input:checked + .slider:before { transform: translateX(25px); }
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        #cert-box {
+            background: rgba(0, 255, 157, 0.05);
+            border: 1px dashed var(--accent);
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: none; /* مخفي افتراضياً */
+        }
 
-    :root {
-      --bg-main: #02030a;
-      --panel-bg: rgba(5, 8, 18, 0.96);
-      --panel-border: rgba(0, 255, 157, 0.25);
-      --accent: #00ff9d;
-      --accent-soft: rgba(0, 255, 157, 0.18);
-      --accent-strong: #00e676;
-      --danger: #ff4b6a;
-      --text-main: #f5f7ff;
-      --text-muted: #8b90a5;
-      --radius-lg: 18px;
-      --radius-pill: 999px;
-      --shadow-strong: 0 22px 60px rgba(0, 0, 0, 0.9);
-    }
+        .btn-publish {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(90deg, #00ff9d, #00b3ff);
+            border: none;
+            border-radius: 50px;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0, 255, 157, 0.3);
+            transition: 0.3s;
+        }
+        .btn-publish:active { transform: scale(0.95); }
 
-    body {
-      font-family: "Tajawal", -apple-system, BlinkMacSystemFont, "SF Pro Display", system-ui, sans-serif;
-      background: radial-gradient(circle at top, #07121f 0, #02030a 45%, #000000 100%);
-      color: var(--text-main);
-      min-height: 100vh;
-      padding: 24px 16px 40px;
-      display: flex;
-      justify-content: center;
-    }
-
-    .layout {
-      width: 100%;
-      max-width: 1120px;
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1.1fr);
-      gap: 20px;
-    }
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr);
-      }
-    }
-
-    .panel {
-      background: radial-gradient(circle at top left, rgba(0, 255, 157, 0.12), transparent 55%),
-                  linear-gradient(145deg, rgba(5, 8, 18, 0.98), rgba(2, 3, 10, 0.98));
-      border-radius: 22px;
-      border: 1px solid var(--panel-border);
-      box-shadow: var(--shadow-strong);
-      padding: 18px 18px 18px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .panel::before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background: radial-gradient(circle at 0 0, rgba(0, 255, 157, 0.18), transparent 55%);
-      opacity: 0.35;
-      mix-blend-mode: screen;
-      pointer-events: none;
-    }
-
-    .panel-header {
-      position: relative;
-      z-index: 1;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .panel-title {
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .panel-title span.dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 16px rgba(0, 255, 157, 0.9);
-      animation: pulse 1.4s infinite ease-out;
-    }
-
-    @keyframes pulse {
-      0% {
-        transform: scale(0.9);
-        opacity: 0.9;
-      }
-      70% {
-        transform: scale(1.4);
-        opacity: 0.1;
-      }
-      100% {
-        transform: scale(0.9);
-        opacity: 0.9;
-      }
-    }
-
-    .panel-subtitle {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    /* الفورم */
-    form {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    .field-group {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    label {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
-
-    input[type="text"],
-    input[type="url"],
-    textarea {
-      background: rgba(0, 0, 0, 0.6);
-      border-radius: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      padding: 8px 10px;
-      color: var(--text-main);
-      font-size: 0.86rem;
-      outline: none;
-      transition: border-color 0.16s ease-out, box-shadow 0.16s ease-out, background 0.16s ease-out;
-    }
-
-    textarea {
-      resize: vertical;
-      min-height: 70px;
-      max-height: 140px;
-    }
-
-    input[type="text"]:focus,
-    input[type="url"]:focus,
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 18px rgba(0, 255, 157, 0.35);
-      background: rgba(0, 0, 0, 0.8);
-    }
-
-    .row {
-      display: flex;
-      gap: 10px;
-    }
-
-    .row > .field-group {
-      flex: 1;
-    }
-
-    @media (max-width: 600px) {
-      .row {
-        flex-direction: column;
-      }
-    }
-
-    .toggle-line {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-top: 4px;
-      margin-bottom: 4px;
-    }
-
-    .toggle-label {
-      font-size: 0.86rem;
-      color: var(--text-main);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .toggle-label span.hint {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .switch {
-      position: relative;
-      width: 44px;
-      height: 22px;
-    }
-
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      inset: 0;
-      background-color: rgba(255, 255, 255, 0.12);
-      border-radius: 999px;
-      transition: 0.2s;
-    }
-
-    .slider:before {
-      content: "";
-      position: absolute;
-      height: 18px;
-      width: 18px;
-      inset-block-start: 2px;
-      inset-inline-start: 3px;
-      background-color: #02030a;
-      border-radius: 50%;
-      transition: 0.2s;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.8);
-    }
-
-    .switch input:checked + .slider {
-      background-color: var(--accent-soft);
-      box-shadow: 0 0 18px rgba(0, 255, 157, 0.45);
-    }
-
-    .switch input:checked + .slider:before {
-      transform: translateX(20px);
-      background-color: var(--accent);
-    }
-
-    .cert-section {
-      margin-top: 4px;
-      padding: 10px;
-      border-radius: 14px;
-      border: 1px dashed rgba(0, 255, 157, 0.35);
-      background: rgba(0, 0, 0, 0.6);
-    }
-
-    .cert-section.hidden {
-      display: none;
-    }
-
-    .cert-title {
-      font-size: 0.8rem;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-
-    /* شريط التقدم */
-    .progress-wrapper {
-      margin-top: 8px;
-      margin-bottom: 4px;
-    }
-
-    .progress-bar-bg {
-      width: 100%;
-      height: 7px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-bar-fill {
-      position: absolute;
-      inset-block: 0;
-      inset-inline-start: 0;
-      width: 0%;
-      background: linear-gradient(90deg, #00ff9d, #00b3ff);
-      box-shadow: 0 0 18px rgba(0, 255, 157, 0.65);
-      transition: width 0.18s ease-out;
-    }
-
-    .progress-label {
-      margin-top: 4px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .progress-label span.status {
-      color: var(--accent);
-    }
-
-    .btn-primary {
-      margin-top: 8px;
-      padding: 9px 18px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(255, 255, 255, 0.35);
-      background-image:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.35), rgba(180, 180, 180, 0.05)),
-        linear-gradient(120deg, #00ff9d, #00b3ff);
-      background-origin: border-box;
-      color: #02030a;
-      font-size: 0.9rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      cursor: pointer;
-      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85), 0 0 26px rgba(0, 255, 157, 0.45);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: default;
-      box-shadow: none;
-    }
-
-    .btn-primary span.icon {
-      font-size: 1.1rem;
-    }
-
-    .form-message {
-      margin-top: 6px;
-      font-size: 0.8rem;
-      color: var(--text-muted);
-    }
-
-    .form-message.error {
-      color: var(--danger);
-    }
-
-    .form-message.success {
-      color: var(--accent);
-    }
-
-    /* قائمة التطبيقات */
-    .apps-list {
-      position: relative;
-      z-index: 1;
-      margin-top: 6px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      max-height: 460px;
-      overflow-y: auto;
-      padding-inline-end: 4px;
-    }
-
-    .apps-list::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    .apps-list::-webkit-scrollbar-thumb {
-      background: rgba(0, 255, 157, 0.35);
-      border-radius: 999px;
-    }
-
-    .app-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      background: rgba(0, 0, 0, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .app-row-main {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .app-row-title {
-      font-size: 0.9rem;
-      font-weight: 500;
-      margin-bottom: 2px;
-    }
-
-    .app-row-bundle {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    .app-row-tag {
-      font-size: 0.75rem;
-      color: var(--accent);
-      margin-top: 2px;
-    }
-
-    .app-row-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-small {
-      padding: 5px 9px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(255, 255, 255, 0.18);
-      background: rgba(0, 0, 0, 0.8);
-      color: var(--text-main);
-      font-size: 0.78rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .btn-small.danger {
-      border-color: rgba(255, 75, 106, 0.6);
-      color: var(--danger);
-    }
-
-    .badge-cert {
-      padding: 3px 8px;
-      border-radius: var(--radius-pill);
-      font-size: 0.72rem;
-      color: var(--accent);
-      background: rgba(0, 255, 157, 0.12);
-      border: 1px solid rgba(0, 255, 157, 0.35);
-    }
-
-    .empty-state {
-      margin-top: 16px;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      text-align: center;
-    }
-  </style>
+        .app-card {
+            background: var(--glass);
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+    </style>
 </head>
 <body>
 
-<div class="layout">
-  <!-- لوحة إضافة التطبيقات -->
-  <section class="panel">
-    <div class="panel-header">
-      <div>
-        <div class="panel-title">
-          <span class="dot"></span>
-          PLUS ADMIN
-        </div>
-        <div class="panel-subtitle">إضافة تطبيقات جديدة إلى متجر Plus (Firestore)</div>
-      </div>
+<div class="admin-container">
+    <div class="header">
+        <h1>👑 نظام التحكم الملكي</h1>
+        <p style="color: #666;">إدارة متجر الوزير بلس</p>
     </div>
 
-    <form id="app-form">
-      <div class="field-group">
-        <label for="name">اسم التطبيق</label>
-        <input id="name" type="text" placeholder="مثال: WhatsApp Plus" required />
-      </div>
+    <input type="text" id="appName" placeholder="اسم التطبيق (مثال: سناب بلس)">
+    <input type="text" id="appBundle" placeholder="البندل آيدي (Bundle ID)">
+    <input type="text" id="appIcon" placeholder="رابط الأيقونة (Direct Link)">
+    <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر">
+    <textarea id="appDesc" placeholder="وصف التطبيق المميز..."></textarea>
 
-      <div class="row">
-        <div class="field-group">
-          <label for="bundleId">Bundle Identifier</label>
-          <input id="bundleId" type="text" placeholder="com.example.app" required />
-        </div>
-        <div class="field-group">
-          <label for="tag">وسم / نوع التطبيق (اختياري)</label>
-          <input id="tag" type="text" placeholder="Social · Tweaked" />
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label for="manifestUrl">رابط ملف الـ Manifest (itms-services)</label>
-        <input id="manifestUrl" type="url" placeholder="https://example.com/app.plist" required />
-      </div>
-
-      <div class="row">
-        <div class="field-group">
-          <label for="iconUrl">رابط أيقونة التطبيق (iOS Squircle)</label>
-          <input id="iconUrl" type="url" placeholder="https://example.com/icon.png" />
-        </div>
-        <div class="field-group">
-          <label for="ipaUrl">رابط ملف IPA (اختياري)</label>
-          <input id="ipaUrl" type="url" placeholder="https://example.com/app.ipa" />
-        </div>
-      </div>
-
-      <div class="field-group">
-        <label for="description">وصف التطبيق</label>
-        <textarea id="description" placeholder="اكتب وصفاً مختصراً للتطبيق والمميزات الرئيسية."></textarea>
-      </div>
-
-      <div class="toggle-line">
-        <div class="toggle-label">
-          <span>تطبيق مدموج جاهز</span>
-          <span class="hint">إخفاء حقول الشهادة إذا كان التطبيق موقّعاً مسبقاً</span>
-        </div>
+    <div class="switch-container">
+        <span>تطبيق يحتاج دمج شهادة؟</span>
         <label class="switch">
-          <input type="checkbox" id="readyMerged" checked />
-          <span class="slider"></span>
+            <input type="checkbox" id="needSign" onchange="toggleCert()">
+            <span class="slider"></span>
         </label>
-      </div>
+    </div>
 
-      <div id="cert-section" class="cert-section hidden">
-        <div class="cert-title">بيانات الشهادة (للتوقيع من طرفك)</div>
-        <div class="field-group">
-          <label for="p12Url">رابط ملف P12</label>
-          <input id="p12Url" type="url" placeholder="https://example.com/cert.p12" />
-        </div>
-        <div class="field-group">
+    <div id="cert-box">
+        <h4 style="margin-top:0; color: var(--accent);">🔑 بيانات التوقيع والدمج</h4>
+        <input type="text" id="p12Url" placeholder="رابط ملف الـ P12">
+        <input type="text" id="provUrl" placeholder="رابط ملف الـ Mobileprovision">
+        <input type="text" id="certPass" placeholder="رمز الشهادة" value="1">
+    </div>
+
+    <button class="btn-publish" onclick="uploadToStore()">نشر التطبيق للمشتركين 🚀</button>
+
+    <h3 style="margin-top: 40px; border-bottom: 1px solid #333; padding-bottom: 10px;">📦 التطبيقات المنشورة حالياً</h3>
+    <div id="appsList">جاري جلب البيانات...</div>
+</div>
+
+<script>
+    // تكوين Firebase (ضع بياناتك هنا)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ",
+        authDomain: "minister-plus.firebaseapp.com",
+        projectId: "minister-plus",
+        storageBucket: "minister-plus.firebasestorage.app",
+        appId: "1:438719729037:web:2d7f14f7c988c3afb501c4"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // إظهار وإخفاء قسم الشهادة
+    function toggleCert() {
+        const box = document.getElementById('cert-box');
+        box.style.display = document.getElementById('needSign').checked ? 'block' : 'none';
+    }
+
+    // وظيفة الرفع لـ Firebase
+    async function uploadToStore() {
+        const name = document.getElementById('appName').value;
+        const ipa = document.getElementById('appIpa').value;
+        if(!name || !ipa) return alert("يا وزير، املأ البيانات الأساسية!");
+
+        const appData = {
+            name: name,
+            bundle: document.getElementById('appBundle').value,
+            img: document.getElementById('appIcon').value,
+            ipa: ipa,
+            desc: document.getElementById('appDesc').value,
+            isReady: !document.getElementById('needSign').checked,
+            p12: document.getElementById('p12Url').value,
+            provision: document.getElementById('provUrl').value,
+            pass: document.getElementById('certPass').value,
+            time: Date.now()
+        };
+
+        try {
+            await db.collection("apps").add(appData);
+            alert("تم النشر بنجاح! سيظهر عند العملاء فوراً ✅");
+            location.reload();
+        } catch(e) { alert("خطأ في الاتصال بقاعدة البيانات!"); }
+    }
+
+    // عرض القائمة مع إمكانية الحذف
+    db.collection("apps").orderBy("time", "desc").onSnapshot(snap => {
+        const list = document.getElementById('appsList');
+        list.innerHTML = '';
+        snap.forEach(doc => {
+            const app = doc.data();
+            list.innerHTML += `
+                <div class="app-card">
+                    <div>
+                        <strong>${app.name}</strong><br>
+                        <small style="color: #888;">${app.isReady ? 'مدموج جاهز' : 'توقيع خاص'}</small>
+                    </div>
+                    <button onclick="deleteApp('${doc.id}')" style="background:none; border:none; color:#ff4b6a; cursor:pointer;">حذف 🗑️</button>
+                </div>
+            `;
+        });
+    });
+
+    async function deleteApp(id) {
+        if(confirm("هل أنت متأكد من حذف التطبيق؟")) await db.collection("apps").doc(id).delete();
+    }
+</script>
+
+</body>
+</html>
