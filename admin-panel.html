@@ -2,31 +2,43 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إدارة الوزير 2026 👑</title>
+    <title>إدارة الوزير بلس - نظام الشهادات 👑</title>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; }
-        .box { background: #0a0a0a; border: 2px solid red; border-radius: 20px; padding: 25px; max-width: 550px; margin: 30px auto; box-shadow: 0 0 30px rgba(255,0,0,0.4); }
-        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #222; background: #111; color: #fff; font-size: 16px; }
-        .btn-send { background: linear-gradient(45deg, #f00, #800); color: white; padding: 15px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 15px; }
-        .item { background: #111; margin: 15px auto; padding: 15px; display: flex; justify-content: space-between; border-radius: 15px; border: 1px solid #333; max-width: 550px; align-items: center; }
-        .del-btn { background: #f00; color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
+        body { background: #000; color: #fff; font-family: sans-serif; text-align: center; padding: 20px; }
+        .admin-box { background: #0a0a0a; border: 2px solid red; border-radius: 25px; padding: 30px; max-width: 650px; margin: auto; box-shadow: 0 0 30px rgba(255,0,0,0.3); }
+        .row { display: flex; gap: 10px; width: 95%; margin: auto; }
+        input, textarea { width: 95%; padding: 12px; margin: 8px 0; border-radius: 12px; border: 1px solid #333; background: #111; color: #fff; font-size: 15px; }
+        input:focus { border-color: red; outline: none; }
+        .btn-add { background: linear-gradient(45deg, #f00, #600); color: white; padding: 16px; border: none; border-radius: 50px; width: 100%; font-weight: bold; cursor: pointer; font-size: 18px; margin-top: 20px; }
+        .cert-section { background: #1a0000; padding: 15px; border-radius: 15px; border: 1px dashed red; margin: 15px 0; }
+        .item { background: #111; margin: 10px auto; padding: 15px; display: flex; justify-content: space-between; border-radius: 15px; border: 1px solid #222; max-width: 650px; align-items: center; }
+        .del-btn { background: #ff0000; color: #fff; border: none; padding: 8px 15px; border-radius: 10px; cursor: pointer; }
     </style>
 </head>
 <body>
-    <h1 style="color:red; text-shadow: 0 0 15px red;">لوحة التحكم الملكية 👑</h1>
+    <h1 style="color:red; text-shadow: 0 0 15px red;">محرر تطبيقات الوزير 🛠️</h1>
     
-    <div class="box">
+    <div class="admin-box">
         <h3>إضافة تطبيق جديد 🚀</h3>
-        <input type="text" id="n" placeholder="اسم التطبيق">
-        <input type="text" id="b" placeholder="Bundle ID (مثال: com.minister.pubg)">
-        <input type="text" id="i" placeholder="رابط الـ IPA المباشر">
-        <input type="text" id="img" placeholder="رابط الأيقونة (Image URL)">
-        <input type="text" id="c" placeholder="رابط الشهادة المدموجة">
-        <textarea id="d" rows="4" placeholder="وصف التطبيق + التقييم (مثال: ⭐⭐⭐⭐⭐ ثبات ايم 100%)"></textarea>
-        <button class="btn-send" onclick="sendToStore()">نشر في المتجر الآن 🔥</button>
+        
+        <input type="text" id="appName" placeholder="اسم التطبيق (مثال: سناب بلس)">
+        <input type="text" id="appBundle" placeholder="Bundle ID (مثال: com.toyota.plus)">
+        <input type="text" id="appIpa" placeholder="رابط الـ IPA المباشر من GitHub">
+        <input type="text" id="appImg" placeholder="رابط الأيقونة (Image URL)">
+        
+        <div class="cert-section">
+            <h4 style="margin:0 0 10px 0; color: #ff9999;">بيانات الشهادة والتوثيق 🛡️</h4>
+            <input type="text" id="certP12" placeholder="رابط ملف الـ P12 المباشر">
+            <input type="text" id="certMobile" placeholder="رابط ملف الـ Mobileprovision المباشر">
+            <input type="text" id="certPass" placeholder="رمز الشهادة (Password)" value="1">
+        </div>
+
+        <textarea id="appDesc" rows="3" placeholder="وصف التطبيق والتقييم..."></textarea>
+        
+        <button class="btn-add" onclick="saveToFirebase()">نشر وتوثيق التطبيق 🔥</button>
     </div>
 
-    <div id="list"></div>
+    <div id="appList"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -43,39 +55,45 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.sendToStore = async () => {
+        window.saveToFirebase = async () => {
             const data = {
-                name: document.getElementById('n').value,
-                bundle: document.getElementById('b').value,
-                ipa: document.getElementById('i').value,
-                img: document.getElementById('img').value,
-                cert: document.getElementById('c').value,
-                desc: document.getElementById('d').value,
+                name: document.getElementById('appName').value,
+                bundle: document.getElementById('appBundle').value,
+                ipa: document.getElementById('appIpa').value,
+                img: document.getElementById('appImg').value,
+                p12: document.getElementById('certP12').value,
+                provision: document.getElementById('certMobile').value,
+                pass: document.getElementById('certPass').value,
+                desc: document.getElementById('appDesc').value,
                 time: Date.now()
             };
+
             if(data.name && data.ipa) {
                 await addDoc(collection(db, "apps"), data);
-                alert("تم النشر بنجاح! ✅");
+                alert("تم النشر والتوثيق بنجاح! ✅");
                 location.reload();
-            } else { alert("عبي البيانات يا وزير!"); }
+            } else { 
+                alert("يا وزير، لازم تعبي اسم التطبيق ورابط الـ IPA على الأقل!"); 
+            }
         };
 
         onSnapshot(collection(db, "apps"), (s) => {
-            const l = document.getElementById('list'); l.innerHTML = '<h2 style="color:gray;">إدارة التطبيقات المنشورة</h2>';
+            const list = document.getElementById('appList'); 
+            list.innerHTML = '<h2 style="color:gray; margin-top:40px;">التطبيقات المتوفرة</h2>';
             s.forEach((d) => {
                 const appData = d.data();
-                l.innerHTML += `
+                list.innerHTML += `
                     <div class="item">
                         <div style="text-align:right;">
                             <strong>${appData.name}</strong><br>
-                            <small style="color:gray;">${appData.bundle}</small>
+                            <small style="color:red;">الرمز: ${appData.pass || '1'}</small>
                         </div>
-                        <button class="del-btn" onclick="deleteApp('${d.id}')">حذف نهائي 🗑️</button>
+                        <button class="del-btn" onclick="deleteApp('${d.id}')">حذف 🗑️</button>
                     </div>`;
             });
         });
 
-        window.deleteApp = async (id) => { if(confirm("هل أنت متأكد من الحذف؟")) await deleteDoc(doc(db, "apps", id)); };
+        window.deleteApp = async (id) => { if(confirm("حذف التطبيق نهائياً؟")) await deleteDoc(doc(db, "apps", id)); };
     </script>
 </body>
 </html>
