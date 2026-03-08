@@ -9,68 +9,86 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
   <style>
     :root { --bg-main: #02030a; --accent: #00ff9d; }
-    body { font-family: "Tajawal", sans-serif; background: #000; color: #fff; margin: 0; padding: 24px 16px; }
-    #particles-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+    body { font-family: "Tajawal", sans-serif; background: #000; color: #fff; margin: 0; padding: 24px 16px; -webkit-tap-highlight-color: transparent; }
     .page-shell { position: relative; z-index: 1; max-width: 500px; margin: 0 auto; }
     header { text-align: center; margin-bottom: 30px; }
     .logo { font-size: 2rem; font-weight: 700; color: var(--accent); text-shadow: 0 0 20px var(--accent); }
-    .app-card { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 22px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; }
-    .app-icon { width: 65px; height: 65px; border-radius: 16px; object-fit: cover; }
+    .app-card { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 22px; padding: 15px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; cursor: pointer; transition: 0.3s; }
+    .app-icon { width: 65px; height: 65px; border-radius: 16px; object-fit: cover; background: #111; }
     .app-info { flex: 1; }
-    .app-name { font-weight: 700; font-size: 1.1rem; display: block; }
+    .app-name { font-weight: 700; font-size: 1.1rem; display: block; color: #fff; }
     .app-status { font-size: 0.8rem; color: var(--accent); display: flex; align-items: center; gap: 5px; margin-top: 5px; }
     .pulse { width: 8px; height: 8px; background: var(--accent); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.5); opacity: 0.5; } 100% { transform: scale(1); opacity: 1; } }
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; backdrop-filter: blur(10px); }
-    .modal { width: 90%; max-width: 400px; background: #111; border-radius: 30px; padding: 25px; text-align: center; border: 1px solid var(--accent); }
-    .btn-install { background: linear-gradient(90deg, #00ff9d, #00b3ff); color: #000; padding: 15px 40px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 20px; }
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: none; align-items: center; justify-content: center; z-index: 100; -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+    .modal { width: 85%; max-width: 350px; background: #111; border-radius: 30px; padding: 25px; text-align: center; border: 1px solid var(--accent); }
+    .btn-install { background: linear-gradient(90deg, #00ff9d, #00b3ff); color: #000; padding: 14px 0; border-radius: 50px; text-decoration: none; font-weight: bold; display: block; margin-top: 20px; width: 100%; font-size: 1.1rem; }
   </style>
 </head>
 <body>
-<canvas id="particles-canvas"></canvas>
 <div class="page-shell">
   <header><div class="logo">الوزير بلس 👑</div></header>
   <div id="apps-list"></div>
 </div>
+
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
-    <img id="mIcon" src="" class="app-icon" style="width: 80px; height: 80px; margin-bottom: 15px;">
-    <h2 id="mName" style="margin: 10px 0;"></h2>
-    <div class="app-status" style="justify-content: center;"><div class="pulse"></div> الشهادة تعمل بنجاح ✅</div>
+    <img id="mIcon" src="" class="app-icon" style="width: 80px; height: 80px; margin-bottom: 15px; display: inline-block;">
+    <h2 id="mName" style="margin: 10px 0; font-size: 1.4rem;"></h2>
+    <div class="app-status" style="justify-content: center;"><div class="pulse"></div> الشهادة تعمل ✅</div>
     <a href="#" id="installBtn" class="btn-install">تثبيت الآن 🚀</a>
-    <div onclick="closeModal()" style="margin-top: 20px; color: #555; cursor: pointer;">إغلاق</div>
+    <div onclick="closeModal()" style="margin-top: 20px; color: #888; cursor: pointer; font-size: 0.9rem;">إغلاق</div>
   </div>
 </div>
+
 <script>
-  var firebaseConfig = { apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ", authDomain: "minister-plus.firebaseapp.com", projectId: "minister-plus", storageBucket: "minister-plus.firebasestorage.app", appId: "1:438719729037:web:2d7f14f7c988c3afb501c4" };
+  // بيانات Firebase الخاصة بك
+  var firebaseConfig = { 
+    apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ", 
+    authDomain: "minister-plus.firebaseapp.com", 
+    projectId: "minister-plus", 
+    storageBucket: "minister-plus.firebasestorage.app", 
+    appId: "1:438719729037:web:2d7f14f7c988c3afb501c4" 
+  };
   firebase.initializeApp(firebaseConfig);
   var db = firebase.firestore();
 
-  db.collection("apps").orderBy("time", "desc").onSnapshot((snapshot) => {
-    const list = document.getElementById("apps-list");
+  // جلب البيانات بطريقة تدعم الأجهزة القديمة (ES5 Compatibility)
+  db.collection("apps").orderBy("isReady", "desc").onSnapshot(function(snapshot) {
+    var list = document.getElementById("apps-list");
     list.innerHTML = "";
-    snapshot.forEach((doc) => {
-      const app = doc.data();
-      const card = document.createElement("div");
-      card.className = "app-card";
-      card.onclick = () => openModal(app);
-      card.innerHTML = `<img src="${app.img}" class="app-icon"><div class="app-info"><span class="app-name">${app.name}</span><div class="app-status"><div class="pulse"></div> PREMIUM VERSION</div></div>`;
-      list.appendChild(card);
+    snapshot.forEach(function(doc) {
+      var app = doc.data();
+      // لا تظهر التطبيق إلا إذا كان جاهزاً
+      if (app.isReady === true) {
+        var card = document.createElement("div");
+        card.className = "app-card";
+        card.onclick = function() { openModal(app); };
+        card.innerHTML = '<img src="' + app.img + '" class="app-icon">' +
+                         '<div class="app-info">' +
+                         '<span class="app-name">' + app.name + '</span>' +
+                         '<div class="app-status"><div class="pulse"></div> إصدار الحماية القصوى</div>' +
+                         '</div>';
+        list.appendChild(card);
+      }
     });
   });
 
   function openModal(app) {
     document.getElementById('mIcon').src = app.img;
     document.getElementById('mName').innerText = app.name;
-    const installBtn = document.getElementById('installBtn');
+    var installBtn = document.getElementById('installBtn');
     
-    // نظام التثبيت المباشر بالشهادة المدمجة
-    const plist = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>${app.ipa}</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>${app.bundle}</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>${app.name}</string></dict></dict></array></dict></plist>`;
-    const base64 = btoa(unescape(encodeURIComponent(plist)));
-    installBtn.href = `itms-services://?action=download-manifest&url=data:text/xml;base64,${base64}`;
+    // إنشاء ملف الـ Plist وتشفيره بطريقة تدعم جميع إصدارات iOS
+    var plist = '<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>' + app.ipa + '</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>' + app.bundle + '</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>' + app.name + '</string></dict></dict></array></dict></plist>';
+    
+    // استخدام btoa الآمن للأجهزة القديمة
+    var base64 = btoa(unescape(encodeURIComponent(plist)));
+    installBtn.href = "itms-services://?action=download-manifest&url=data:text/xml;base64," + base64;
     
     document.getElementById('modalOverlay').style.display = 'flex';
   }
+
   function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
 </script>
 </body>
