@@ -4,59 +4,24 @@
     <meta charset="UTF-8">
     <title>الوزير بلس 👑</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-firestore.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #000; color: #fff; text-align: center; padding: 20px; }
+        .app-card { background: #111; border: 2px solid #00ff9d; border-radius: 20px; padding: 20px; max-width: 300px; margin: 20px auto; }
+        .app-icon { width: 80px; height: 80px; border-radius: 18px; margin-bottom: 10px; }
+        .btn-install { background: #00ff9d; color: #000; padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: bold; display: inline-block; margin-top: 15px; }
+        h1 { color: #00ff9d; }
+    </style>
 </head>
-<body style="background:#000; color:#fff; text-align:center; font-family:sans-serif;">
+<body>
 
-    <h1 style="color:#00ff9d;">الوزير بلس 👑</h1>
-    <hr border="1" color="#333">
+    <h1>الوزير بلس 👑</h1>
     
-    <div id="apps-list">جاري جلب التطبيقات...</div>
+    <div class="app-card">
+        <img src="https://img.icons8.com/color/512/snapchat--v1.png" class="app-icon">
+        <h2>سناب الوزير بلس</h2>
+        <p style="color: #888;">إصدار مستقر ✅</p>
+        <a href="itms-services://?action=download-manifest&url=data:text/xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48IURPQ1RZUEUgcGxpc3QgUFVCTElDICItLy9BcHBsZS8vRFREIFBMSVNUIDEuMC8vRU4iICJodHRwOi8vd3d3LmFwcGxlLmNvbS9EVERzL1Byb3BlcnR5TGlzdC0xLjAuZHRkIj48cGxpc3QgdmVyc2lvbj0iMS4wIj48ZGljdD48a2V5Pml0ZW1zPC9rZXk+PGFycmF5PjxkaWN0PjxrZXk+YXNzZXRzPC9rZXk+PGFycmF5PjxkaWN0PjxrZXk+a2luZDwva2V5PjxzdHJpbmc+c29mdHdhcmUtcGFja2FnZTwvc3RyaW5nPjxrZXk+dXJsPC9rZXk+PHN0cmluZz5odHRwczovL2dpdGh1Yi5jb20vc2Rlcjg2MTY0LWNlbGwvc3RvcmUvcmVsZWFzZXMvZG93bmxvYWQvdjEuMC9TbmFwQWx3YXplci5pcGE8L3N0cmluZz48L2RpY3Q+PC9hcnJheT48a2V5Pm1ldGFkYXRhPC9rZXk+PGRpY3Q+PGtleT5idW5kbGUtaWRlbnRpZmllcjwva2V5PjxzdHJpbmc+Y29tLnNuYXAuYWx3emVyPC9zdHJpbmc+PGtleT5idW5kbGUtdmVyc2lvbjwva2V5PjxzdHJpbmc+MS4wPC9zdHJpbmc+PGtleT5raW5kPC9rZXk+PHN0cmluZz5zb2Z0d2FyZTwvc3RyaW5nPjxrZXk+dGl0bGU8L2tleT48c3RyaW5nPtizbmFpINin2YTZiNiy2YrYsSDYqNmE2LMg8J+RkTwvc3RyaW5nPjwvZGljdD48L2RpY3Q+PC9hcnJheT48L2RpY3Q+PC9wbGlzdD4=" class="btn-install">تثبيت الآن 🚀</a>
+    </div>
 
-    <script>
-        // بيانات Firebase الخاصة بك
-        var firebaseConfig = { 
-            apiKey: "AIzaSyAoQFWpkb1B8twwEC8B9S2XqdUDZ6BI0WQ", 
-            authDomain: "minister-plus.firebaseapp.com", 
-            projectId: "minister-plus", 
-            storageBucket: "minister-plus.firebasestorage.app", 
-            appId: "1:438719729037:web:2d7f14f7c988c3afb501c4" 
-        };
-        firebase.initializeApp(firebaseConfig);
-        var db = firebase.firestore();
-
-        // طريقة جلب البيانات الكلاسيكية المتوافقة مع آيفون 7
-        db.collection("apps").get().then(function(querySnapshot) {
-            var list = document.getElementById("apps-list");
-            list.innerHTML = "";
-            
-            if (querySnapshot.empty) {
-                list.innerHTML = "لا توجد تطبيقات حالياً";
-            }
-
-            querySnapshot.forEach(function(doc) {
-                var app = doc.data();
-                // التأكد أن التطبيق مفعّل
-                if (app.isReady === true) {
-                    var div = document.createElement("div");
-                    div.style.margin = "20px";
-                    div.style.padding = "15px";
-                    div.style.background = "#111";
-                    div.style.border = "1px solid #00ff9d";
-                    div.style.borderRadius = "15px";
-                    
-                    div.innerHTML = '<img src="' + app.img + '" style="width:70px; border-radius:15px;"><br>' +
-                                    '<h3>' + app.name + '</h3>' +
-                                    '<a href="itms-services://?action=download-manifest&url=data:text/xml;base64,' + 
-                                    btoa(unescape(encodeURIComponent('<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd"><plist version="1.0"><dict><key>items</key><array><dict><key>assets</key><array><dict><key>kind</key><string>software-package</string><key>url</key><string>' + app.ipa + '</string></dict></array><key>metadata</key><dict><key>bundle-identifier</key><string>' + app.bundle + '</string><key>bundle-version</key><string>1.0</string><key>kind</key><string>software</string><key>title</key><string>' + app.name + '</string></dict></dict></array></dict></plist>'))) + 
-                                    '" style="background:#00ff9d; color:#000; padding:10px 25px; border-radius:50px; text-decoration:none; font-weight:bold;">تثبيت الآن</a>';
-                    list.appendChild(div);
-                }
-            });
-        }).catch(function(error) {
-            document.getElementById("apps-list").innerHTML = "خطأ في الاتصال: " + error;
-        });
-    </script>
 </body>
 </html>
